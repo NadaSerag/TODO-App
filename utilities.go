@@ -34,7 +34,7 @@ func InitializeTodoArray() []Todo {
 // the parameter is by convention named "c".
 
 func GetTodos(c *gin.Context) {
-	//200
+	//200 code for Successful GET
 	c.JSON(200, Todos)
 }
 
