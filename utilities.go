@@ -7,9 +7,13 @@ import (
 )
 
 type Todo struct {
-	Id        int    `json:"id"`
-	Title     string `json:"title"`
-	Completed bool   `json:"completed"`
+	Id          int    `json:"id"`
+	Title       string `json:"title"`
+	Completed   bool   `json:"completed"`
+	Category    string `json:"category"`
+	Priority    string `json:"priority"`
+	CompletedAt string `json:"completedAt"`
+	DueDate     string `json:"dueDate"`
 }
 
 var Todos []Todo
