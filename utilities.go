@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -8,14 +9,26 @@ import (
 
 type Todo struct {
 	Id          int    `json:"id"`
-	Title       string `json:"title"`
-	Completed   bool   `json:"completed"`
-	Category    string `json:"category"`
-	Priority    string `json:"priority"`
+	Title       string `json:"title" binding:"required"`
+	Completed   *bool  `json:"completed" binding:"required"`
+	Category    string `json:"category" binding:"required"`
+	Priority    string `json:"priority" binding:"required"`
 	CompletedAt string `json:"completedAt"`
-	DueDate     string `json:"dueDate"`
+	DueDate     string `json:"dueDate" binding:"required"`
 }
 
+// type Todo struct {
+// 	Id          int    `json:"id"`
+// 	Title       string `json:"title" binding:"required"`
+// 	Completed   *bool   `json:"completed"`
+// 	Category    string `json:"category"`
+// 	Priority    string `json:"priority"`
+// 	CompletedAt string `json:"completedAt"`
+// 	DueDate     string `json:"dueDate"`
+// }
+
+var connectionStr = "postgres://postgres:Mydatabase123@localhost:5432/todo_app?sslmode=disable"
+var db, _ = sql.Open("postgres", connectionStr)
 var Todos []Todo
 var id = 1
 
@@ -58,10 +71,11 @@ func CreateTodo(c *gin.Context) {
 	var newTodo Todo
 
 	//VERY IMPORTANT: reading the request body
-	error := c.ShouldBindJSON(&newTodo)
+	//returns an error, error is = nil if JSON parses successfully
+	errorVar := c.ShouldBindJSON(&newTodo)
 
 	//checking for invalid JSON
-	if error != nil {
+	if errorVar != nil {
 		c.JSON(400, gin.H{"error": "Invalid JSON"})
 		return
 	}
@@ -76,5 +90,19 @@ func CreateTodo(c *gin.Context) {
 	Todos = append(Todos, newTodo)
 	id++
 
+	query := `
+        INSERT INTO todos (id, title, completed, category, priority, completedAt, dueDate)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+    `
+
+	db.QueryRow(query,
+		newTodo.Id,
+		newTodo.Title,
+		newTodo.Completed,
+		newTodo.Category,
+		newTodo.Priority,
+		newTodo.CompletedAt,
+		newTodo.DueDate,
+	)
 	c.JSON(200, newTodo)
 }

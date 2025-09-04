@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"log"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
@@ -12,14 +11,13 @@ import (
 func main() {
 	router := gin.Default()
 
-	connStr := "postgres://postgres:Mydatabase123@localhost:5432/todo_app?sslmode=disable"
+	connectionStr := "postgres://postgres:Mydatabase123@localhost:5432/todo_app?sslmode=disable"
 
-	db, err := sql.Open("postgres", connStr)
+	db, err := sql.Open("postgres", connectionStr)
 
-	// Testing connection
-	err = db.Ping()
 	if err != nil {
-		log.Fatal("Cannot connect to database:", err)
+		fmt.Println(err)
+		return
 	}
 
 	fmt.Println("Connected to PostgreSQL, Yayy!")
@@ -34,4 +32,6 @@ func main() {
 	router.POST("/todos", CreateTodo)
 
 	router.Run() // listen and serve on 0.0.0.0:8080
+
+	db.Close()
 }
