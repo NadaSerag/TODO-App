@@ -33,6 +33,8 @@ func main() {
 	router.GET("/todos/status/:status", GetTodosByStatus)
 	router.GET("/todos/search/:q", GetTodosBySearch)
 	router.POST("/todos", CreateTodo)
+	router.PUT("/todos/:id", UpdateTodo)
+  
 
 	router.Run() // listen and serve on 0.0.0.0:8080
 

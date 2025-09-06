@@ -232,7 +232,7 @@ func CreateTodo(c *gin.Context) {
 	//BindJSON or ShouldBindJson  = reads the JSON payload, not the URL.
 
 	//returns an error, error is = nil if JSON parses successfully
-	errorVar := c.ShouldBindJSON(&newTodo)
+	err := c.ShouldBindJSON(&newTodo)
 
 	//checking if the title is empty
 	if newTodo.Title == "" {
@@ -256,7 +256,7 @@ func CreateTodo(c *gin.Context) {
 	}
 
 	//checking for invalid JSON
-	if errorVar != nil {
+	if err != nil {
 		c.JSON(400, gin.H{"error": "Invalid JSON"})
 		return
 	}
@@ -277,4 +277,70 @@ func CreateTodo(c *gin.Context) {
 	).Scan(&newTodo.Id)
 
 	c.JSON(200, newTodo)
+}
+
+func UpdateTodo(c *gin.Context) {
+
+	var updatedTodo Todo
+	err := c.ShouldBindJSON(&updatedTodo)
+
+	if updatedTodo.Title == "" {
+		c.JSON(400, gin.H{"error": "Title cannot be empty"})
+		return
+	}
+
+	if !PriorityValid(updatedTodo.Priority) {
+		c.JSON(400, gin.H{"error": "Priority must be Low, Medium, or High"})
+		return
+	}
+
+	if !CategoryValid(updatedTodo.Category) {
+		c.JSON(400, gin.H{"error": "Category must be Work, Personal, or Study"})
+		return
+	}
+
+	if !DueDateValid(updatedTodo.DueDate) {
+		c.JSON(400, gin.H{"error": "Due date cannot be in the past"})
+		return
+	}
+
+	//checking for invalid JSON
+	if err != nil {
+		c.JSON(400, gin.H{"error": "Invalid JSON"})
+		return
+	}
+
+	query := `
+        UPDATE todos
+				SET title = $1, completed = $2, category = $3, priority = $4, dueDate = $5
+				WHERE id = $6
+				`
+
+	idToSearchFor, _ := strconv.Atoi(c.Param("id"))
+
+	res, _ := db.Exec(query,
+		updatedTodo.Title,
+		updatedTodo.Completed,
+		updatedTodo.Category,
+		updatedTodo.Priority,
+		updatedTodo.DueDate,
+		idToSearchFor)
+
+	rowsAffected, _ := res.RowsAffected()
+	if rowsAffected == 0 {
+		c.JSON(404, gin.H{"error": "Todo not found, probably invalid ID"})
+		return
+	}
+
+	if updatedTodo.Completed != nil && *(updatedTodo.Completed) {
+		//placing the time.Now in a variable (type time.Time)
+		currentTime := time.Now()
+		//taking its address &currentTime to assign it to CompletedAt (pointer to time.Time: type *time.Time)
+		updatedTodo.CompletedAt = &currentTime
+	}
+
+	updatedTodo.Id = idToSearchFor
+
+	c.JSON(200, updatedTodo)
+
 }

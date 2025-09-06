@@ -17,7 +17,7 @@ func CategoryValid(cat string) bool {
 }
 
 func DueDateValid(date *time.Time) bool {
-	if (*date).Before(time.Now()) {
+	if date != nil && (*date).Before(time.Now()) {
 		return false
 	}
 	return true
