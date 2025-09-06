@@ -8,6 +8,21 @@ import (
 	_ "github.com/lib/pq"
 )
 
+func initializeTable() {
+	query := `
+    CREATE TABLE IF NOT EXISTS todos (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        completed BOOLEAN DEFAULT FALSE,
+        category TEXT,
+        priority TEXT,
+        completedAt TIMESTAMP NULL,
+        dueDate TIMESTAMP NULL
+    );`
+
+	db.Exec(query)
+}
+
 func main() {
 	router := gin.Default()
 
@@ -26,6 +41,10 @@ func main() {
 	// 		"message": "pong",
 	// 	})
 	// })
+
+
+	//crating the `todos` table in the PostgreSQL database on startup if it doesn’t exist.
+	initializeTable()
 
 	router.GET("/todos", GetTodos)
 	router.GET("/todos/:id", GetTodoById)
