@@ -9,6 +9,7 @@ import (
 )
 
 func initializeTable() {
+	//'query' parameter variable for db.Exec(...)
 	query := `
     CREATE TABLE IF NOT EXISTS todos (
         id SERIAL PRIMARY KEY,
@@ -41,7 +42,6 @@ func main() {
 	// 		"message": "pong",
 	// 	})
 	// })
-
 
 	//crating the `todos` table in the PostgreSQL database on startup if it doesn’t exist.
 	initializeTable()
