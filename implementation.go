@@ -5,18 +5,19 @@ package main
 import (
 	"database/sql"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Todo struct {
-	Id          int    `json:"id"`
-	Title       string `json:"title" binding:"required"`
-	Completed   *bool  `json:"completed" binding:"required"`
-	Category    string `json:"category" binding:"required"`
-	Priority    string `json:"priority" binding:"required"`
-	CompletedAt string `json:"completedAt"`
-	DueDate     string `json:"dueDate" binding:"required"`
+	Id          int        `json:"id"`
+	Title       string     `json:"title" binding:"required"`
+	Completed   *bool      `json:"completed" binding:"required"`
+	Category    string     `json:"category" binding:"required"`
+	Priority    string     `json:"priority" binding:"required"`
+	CompletedAt *time.Time `json:"completedAt"`
+	DueDate     *time.Time `json:"dueDate"`
 }
 
 // connection with DSN (Data Source Name) established
@@ -24,14 +25,9 @@ type Todo struct {
 var connectionStr = "postgres://postgres:Mydatabase123@localhost:5432/todo_app?sslmode=disable"
 
 var db, _ = sql.Open("postgres", connectionStr)
-var Todos []Todo
-var id = 1
 
-func InitializeTodoArray() []Todo {
-	//The in-memory store (slice) is initialized as empty.
-	Todos = []Todo{}
-	return Todos
-}
+// var Todos []Todo
+var id = 5
 
 // - 200: Successful GET, POST, PUT, or DELETE.
 // - 400: Invalid JSON or empty title.
@@ -42,24 +38,76 @@ func InitializeTodoArray() []Todo {
 // the parameter is by convention named "c".
 
 func GetTodos(c *gin.Context) {
+	allTodos := []Todo{}
+	var todoGotten Todo
+
+	//retrieving todos from our database to return them
+	query := `
+    SELECT *
+    FROM todos
+`
+	rows, _ := db.Query(query)
+	for rows.Next() {
+		rows.Scan(
+			&todoGotten.Id,
+			&todoGotten.Title,
+			&todoGotten.Completed,
+			&todoGotten.Category,
+			&todoGotten.Priority,
+			&todoGotten.CompletedAt,
+			&todoGotten.DueDate,
+		)
+		allTodos = append(allTodos, todoGotten)
+	}
+
 	//200 code for Successful GET
-	c.JSON(200, Todos)
+	c.JSON(200, allTodos)
+
+	rows.Close()
+
 }
 
 func GetTodoById(c *gin.Context) {
 	//c.Param(...) returns the value as a string.
 	//thats wy we need to convert it to an int by strconv.Atoi
 	id, _ := strconv.Atoi(c.Param("id"))
+	var todoByIdFound Todo
 
-	for i := 0; i < len(Todos); i++ {
-		if Todos[i].Id == id {
-			c.JSON(200, Todos[i])
-			return
-		}
+	//method#1: searching in out in-memory struct
+	// for i := 0; i < len(Todos); i++ {
+	// 	if Todos[i].Id == id {
+	// 		c.JSON(200, Todos[i])
+	// 		return
+	// 	}
+	// }
+
+	//method#2 ( better ): searching in our database
+	query := `
+    SELECT *
+    FROM todos
+    WHERE id = $1
+`
+	row := db.QueryRow(query, id)
+
+	err := row.Scan(
+		&todoByIdFound.Id,
+		&todoByIdFound.Title,
+		&todoByIdFound.Completed,
+		&todoByIdFound.Category,
+		&todoByIdFound.Priority,
+		&todoByIdFound.CompletedAt,
+		&todoByIdFound.DueDate,
+	)
+
+	if err != nil {
+		// code 404 used bec: Todo not found for GET, PUT, or DELETE.
+		c.JSON(404, gin.H{"error": "Todo not found"})
+		return
 	}
 
-	// code 404 used bec: Todo not found for GET, PUT, or DELETE.
-	c.JSON(404, gin.H{"error": "Todo not found"})
+	//row successfully found
+	c.JSON(200, todoByIdFound)
+
 }
 
 func GetTodosByCategory(c *gin.Context) {
@@ -198,24 +246,20 @@ func CreateTodo(c *gin.Context) {
 		return
 	}
 
-	newTodo.Id = id
-	Todos = append(Todos, newTodo)
-	//incrementing manually?
-	id++
-
 	query := `
-        INSERT INTO todos (id, title, completed, category, priority, completedAt, dueDate)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        INSERT INTO todos (title, completed, category, priority, completedAt, dueDate)
+        VALUES ($1, $2, $3, $4, $5, $6)
+				RETURNING id
     `
 
-	db.Exec(query,
-		newTodo.Id,
+	db.QueryRow(query,
 		newTodo.Title,
 		newTodo.Completed,
 		newTodo.Category,
 		newTodo.Priority,
 		newTodo.CompletedAt,
 		newTodo.DueDate,
-	)
+	).Scan(&newTodo.Id)
+
 	c.JSON(200, newTodo)
 }
