@@ -234,15 +234,30 @@ func CreateTodo(c *gin.Context) {
 	//returns an error, error is = nil if JSON parses successfully
 	errorVar := c.ShouldBindJSON(&newTodo)
 
-	//checking for invalid JSON
-	if errorVar != nil {
-		c.JSON(400, gin.H{"error": "Invalid JSON"})
-		return
-	}
-
 	//checking if the title is empty
 	if newTodo.Title == "" {
 		c.JSON(400, gin.H{"error": "Title cannot be empty"})
+		return
+	}
+
+	if !PriorityValid(newTodo.Priority) {
+		c.JSON(400, gin.H{"error": "Priority must be Low, Medium, or High"})
+		return
+	}
+
+	if !CategoryValid(newTodo.Category) {
+		c.JSON(400, gin.H{"error": "Category must be Work, Personal, or Study"})
+		return
+	}
+
+	if !DueDateValid(newTodo.DueDate) {
+		c.JSON(400, gin.H{"error": "Due date cannot be in the past"})
+		return
+	}
+
+	//checking for invalid JSON
+	if errorVar != nil {
+		c.JSON(400, gin.H{"error": "Invalid JSON"})
 		return
 	}
 
