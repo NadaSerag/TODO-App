@@ -337,10 +337,104 @@ func UpdateTodo(c *gin.Context) {
 		currentTime := time.Now()
 		//taking its address &currentTime to assign it to CompletedAt (pointer to time.Time: type *time.Time)
 		updatedTodo.CompletedAt = &currentTime
+
+		query2 := `
+        UPDATE todos
+				SET completedat = $1
+				WHERE id = $2
+				`
+		db.Exec(query2, currentTime, idToSearchFor)
 	}
 
 	updatedTodo.Id = idToSearchFor
 
 	c.JSON(200, updatedTodo)
+}
 
+func UpdateTodosByCategory(c *gin.Context) {
+	var updatedTodos []Todo
+	//Todo variable to 'scan the info to it' in rows.Scan, then add each one to the array updatedTodos
+	var extractedTodo Todo
+	var updatedStat Todo
+
+	categoryToSearchFor := c.Param("category")
+
+	if !CategoryValid(categoryToSearchFor) {
+		c.JSON(400, gin.H{"error": "Invalid Category in URL: Category must be Work, Personal, or Study"})
+		return
+	}
+
+	err := c.ShouldBindJSON(&updatedStat)
+
+	//checking for invalid JSON
+	if err != nil {
+		c.JSON(400, gin.H{"error": "Invalid JSON"})
+		return
+	}
+
+	query := `
+        UPDATE todos
+				SET completed = $1
+				WHERE category = $2
+				`
+
+	db.Exec(query, updatedStat.Completed, categoryToSearchFor)
+
+	if updatedStat.Completed != nil && *(updatedStat.Completed) {
+		currentTime := time.Now()
+
+		query2 := `
+        UPDATE todos
+				SET completedat = $1
+				WHERE category = $2
+				`
+		db.Exec(query2, currentTime, categoryToSearchFor)
+	}
+
+	query3 := `
+        SELECT * FROM todos
+				WHERE category = $1
+				`
+
+	rows, _ := db.Query(query3, categoryToSearchFor)
+	for rows.Next() {
+		rows.Scan(
+			&extractedTodo.Id,
+			&extractedTodo.Title,
+			&extractedTodo.Completed,
+			&extractedTodo.Category,
+			&extractedTodo.Priority,
+			&extractedTodo.CompletedAt,
+			&extractedTodo.DueDate,
+		)
+		updatedTodos = append(updatedTodos, extractedTodo)
+	}
+
+	//200 code for Successful PUT
+	c.JSON(200, updatedTodos)
+}
+
+func DeleteById(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	query := `DELETE FROM todos WHERE id = $1`
+	res, _ := db.Exec(query, id)
+
+	rowsAffected, _ := res.RowsAffected()
+	if rowsAffected == 0 {
+		c.JSON(404, gin.H{"error": "Todo not found, probably invalid ID"})
+		return
+	}
+
+	//200 code for Successful DELETE
+	c.JSON(200, gin.H{"message": "Todo deleted"})
+}
+
+func DeleteAll(c *gin.Context) {
+
+	query := `DELETE FROM todos`
+	db.Exec(query)
+
+	//200 code for Successful DELETE
+	c.JSON(200, gin.H{"message": "All todos deleted"})
 }
