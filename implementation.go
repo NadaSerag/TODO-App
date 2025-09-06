@@ -1,5 +1,7 @@
 package main
 
+//file to implement the APIs
+
 import (
 	"database/sql"
 	"strconv"
@@ -17,17 +19,10 @@ type Todo struct {
 	DueDate     string `json:"dueDate" binding:"required"`
 }
 
-// type Todo struct {
-// 	Id          int    `json:"id"`
-// 	Title       string `json:"title" binding:"required"`
-// 	Completed   *bool   `json:"completed"`
-// 	Category    string `json:"category"`
-// 	Priority    string `json:"priority"`
-// 	CompletedAt string `json:"completedAt"`
-// 	DueDate     string `json:"dueDate"`
-// }
-
+// connection with DSN (Data Source Name) established
+// connectionStr is a formatted string that tells Go’s PostgreSQL driver how to connect to our database.
 var connectionStr = "postgres://postgres:Mydatabase123@localhost:5432/todo_app?sslmode=disable"
+
 var db, _ = sql.Open("postgres", connectionStr)
 var Todos []Todo
 var id = 1
@@ -67,10 +62,127 @@ func GetTodoById(c *gin.Context) {
 	c.JSON(404, gin.H{"error": "Todo not found"})
 }
 
+func GetTodosByCategory(c *gin.Context) {
+	//detecting the wanted category in the URL
+	category := c.Param("category")
+
+	//the returning response initialized as an empty array of todos
+	todosByCategory := []Todo{}
+	var todoToAdd Todo
+
+	//by using our struct
+	// for i := 0; i < len(Todos); i++ {
+	// 	if Todos[i].Category == category {
+	// 		todosByCategory = append(todosByCategory, Todos[i])
+	// 	}
+	// }
+
+	//by using our database & SQL instructions
+	query := `
+    SELECT *
+    FROM todos
+    WHERE category = $1
+`
+	rows, _ := db.Query(query, category)
+	for rows.Next() {
+		rows.Scan(
+			&todoToAdd.Id,
+			&todoToAdd.Title,
+			&todoToAdd.Completed,
+			&todoToAdd.Category,
+			&todoToAdd.Priority,
+			&todoToAdd.CompletedAt,
+			&todoToAdd.DueDate,
+		)
+		todosByCategory = append(todosByCategory, todoToAdd)
+	}
+	c.JSON(200, todosByCategory)
+	rows.Close()
+
+	//LOOP EXPLANATION (for ...)
+
+	// 	rows.Scan importance:
+	// Postgres gives Go a row of raw values (like a slice of interfaces — []interface{}),
+	// but Go has no idea how I want to map them into my struct.
+	// rows.Scan takes those raw column values and copies them into the variables in order.
+
+	//rows.Next usage:
+	// the rows object represents a stream of results coming from the database.
+	// rows.Next() advances to the next row in the result set.
+	// It returns true if there is another row, false if there are no more.
+	//Thats why it's usually called inside a for loop.
+}
+
+func GetTodosByStatus(c *gin.Context) {
+	//detecting the wanted status from the URL
+	stat := c.Param("status")
+
+	//the returning response initialized as an empty array of todos
+	todosByStatus := []Todo{}
+	var todoToAdd Todo
+
+	query := `
+    SELECT *
+    FROM todos
+    WHERE completed = $1
+`
+	rows, _ := db.Query(query, stat)
+	for rows.Next() {
+		rows.Scan(
+			&todoToAdd.Id,
+			&todoToAdd.Title,
+			&todoToAdd.Completed,
+			&todoToAdd.Category,
+			&todoToAdd.Priority,
+			&todoToAdd.CompletedAt,
+			&todoToAdd.DueDate,
+		)
+		todosByStatus = append(todosByStatus, todoToAdd)
+	}
+	c.JSON(200, todosByStatus)
+	rows.Close()
+}
+
+func GetTodosBySearch(c *gin.Context) {
+	//detecting the wanted status from the URL
+	search := c.Param("search")
+
+	//the returning response initialized as an empty array of todos
+	todosBySearch := []Todo{}
+	var todoToAdd Todo
+
+	query := `
+    SELECT *
+    FROM todos
+    WHERE title LIKE $1
+`
+	rows, _ := db.Query(query, search+"%")
+
+	for rows.Next() {
+		rows.Scan(
+			&todoToAdd.Id,
+			&todoToAdd.Title,
+			&todoToAdd.Completed,
+			&todoToAdd.Category,
+			&todoToAdd.Priority,
+			&todoToAdd.CompletedAt,
+			&todoToAdd.DueDate,
+		)
+		todosBySearch = append(todosBySearch, todoToAdd)
+	}
+	c.JSON(200, todosBySearch)
+	rows.Close()
+}
+
 func CreateTodo(c *gin.Context) {
 	var newTodo Todo
 
-	//VERY IMPORTANT: reading the request body
+	//VERY IMPORTANT: reading the request body (JSON)
+
+	//N.B.:
+	//c.Param(" ... ") = extracts directly from the URL, not the JSON body.
+	//BindJSON or ShouldBindJson  = reads the JSON payload, not the URL.
+
 	//returns an error, error is = nil if JSON parses successfully
 	errorVar := c.ShouldBindJSON(&newTodo)
 
@@ -88,6 +200,7 @@ func CreateTodo(c *gin.Context) {
 
 	newTodo.Id = id
 	Todos = append(Todos, newTodo)
+	//incrementing manually?
 	id++
 
 	query := `
@@ -95,7 +208,7 @@ func CreateTodo(c *gin.Context) {
         VALUES ($1, $2, $3, $4, $5, $6, $7)
     `
 
-	db.QueryRow(query,
+	db.Exec(query,
 		newTodo.Id,
 		newTodo.Title,
 		newTodo.Completed,

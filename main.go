@@ -29,6 +29,9 @@ func main() {
 
 	router.GET("/todos", GetTodos)
 	router.GET("/todos/:id", GetTodoById)
+	router.GET("/todos/category/:category", GetTodosByCategory)
+	router.GET("/todos/status/:status", GetTodosByStatus)
+	router.GET("/todos/search/:q", GetTodosBySearch)
 	router.POST("/todos", CreateTodo)
 
 	router.Run() // listen and serve on 0.0.0.0:8080
