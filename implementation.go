@@ -193,7 +193,7 @@ func GetTodosByStatus(c *gin.Context) {
 
 func GetTodosBySearch(c *gin.Context) {
 	//detecting the wanted status from the URL
-	search := c.Param("search")
+	search := c.Query("q")
 
 	//the returning response initialized as an empty array of todos
 	todosBySearch := []Todo{}

@@ -31,7 +31,7 @@ func main() {
 	router.GET("/todos/:id", GetTodoById)
 	router.GET("/todos/category/:category", GetTodosByCategory)
 	router.GET("/todos/status/:status", GetTodosByStatus)
-	router.GET("/todos/search/:q", GetTodosBySearch)
+	router.GET("/todos/search/", GetTodosBySearch)
 	router.POST("/todos", CreateTodo)
 	router.PUT("/todos/:id", UpdateTodo)
 	router.PUT("/todos/category/:category", UpdateTodosByCategory)
