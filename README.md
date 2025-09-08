@@ -1,5 +1,7 @@
 # TODO-App
 A RESTful API for a Todo App using Go and the `gin-gonic/gin` framework for routing.
+
+The app manages todo items stored in a PostgreSQL database using GORM (ORM for Go) and supports CRUD operations (Create, Read, Update, Delete) with features like categorization, prioritization, completion tracking, due dates, status filtering, title search, and bulk updates.
 ### Database set up:
 1- Download PostgreSQL (make sure to memorize or write the password you enter while installing because it's needed in step 4)
 
@@ -16,6 +18,7 @@ A RESTful API for a Todo App using Go and the `gin-gonic/gin` framework for rout
 
 ### Recommended: How to Test Each Endpoint
 Here are the steps on how to start testing each endpoint. Trust me, it's so much fun when you get the hang of it!
+
 1- Download Postman
 
 2- Select the method (GET, POST, PUT, DELETE)
