@@ -4,6 +4,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -26,9 +27,6 @@ var connectionStr = "postgres://postgres:Mydatabase123@localhost:5432/todo_app?s
 
 var db, _ = sql.Open("postgres", connectionStr)
 
-// var Todos []Todo
-var id = 5
-
 // - 200: Successful GET, POST, PUT, or DELETE.
 // - 400: Invalid JSON or empty title.
 // - 404: Todo not found for GET, PUT, or DELETE.
@@ -39,31 +37,20 @@ var id = 5
 
 func GetTodos(c *gin.Context) {
 	allTodos := []Todo{}
-	var todoGotten Todo
 
-	//retrieving todos from our database to return them
-	query := `
-    SELECT *
-    FROM todos
-`
-	rows, _ := db.Query(query)
-	for rows.Next() {
-		rows.Scan(
-			&todoGotten.Id,
-			&todoGotten.Title,
-			&todoGotten.Completed,
-			&todoGotten.Category,
-			&todoGotten.Priority,
-			&todoGotten.CompletedAt,
-			&todoGotten.DueDate,
-		)
-		allTodos = append(allTodos, todoGotten)
+	//Find() returns a *gorm.DB object (which contains things like error status, rows affected, etc.).
+	result := DB.Find(&allTodos) // SELECT * FROM users;
+
+	if result.Error != nil {
+		fmt.Println(result.Error)
 	}
+
+	//just used these lines to make sure everything is going fine:
+	//fmt.Println(result.RowsAffected)  correct, printed 7, and they are 7 todos
+	//fmt.Println(allTodos)             correct, printed all todos in terminal
 
 	//200 code for Successful GET
 	c.JSON(200, allTodos)
-
-	rows.Close()
 
 }
 
@@ -73,31 +60,7 @@ func GetTodoById(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	var todoByIdFound Todo
 
-	//method#1: searching in out in-memory struct
-	// for i := 0; i < len(Todos); i++ {
-	// 	if Todos[i].Id == id {
-	// 		c.JSON(200, Todos[i])
-	// 		return
-	// 	}
-	// }
-
-	//method#2 ( better ): searching in our database
-	query := `
-    SELECT *
-    FROM todos
-    WHERE id = $1
-`
-	row := db.QueryRow(query, id)
-
-	err := row.Scan(
-		&todoByIdFound.Id,
-		&todoByIdFound.Title,
-		&todoByIdFound.Completed,
-		&todoByIdFound.Category,
-		&todoByIdFound.Priority,
-		&todoByIdFound.CompletedAt,
-		&todoByIdFound.DueDate,
-	)
+	err := DB.Find(&todoByIdFound, id)
 
 	if err != nil {
 		// code 404 used bec: Todo not found for GET, PUT, or DELETE.
@@ -107,7 +70,6 @@ func GetTodoById(c *gin.Context) {
 
 	//row successfully found
 	c.JSON(200, todoByIdFound)
-
 }
 
 func GetTodosByCategory(c *gin.Context) {
@@ -116,49 +78,16 @@ func GetTodosByCategory(c *gin.Context) {
 
 	//the returning response initialized as an empty array of todos
 	todosByCategory := []Todo{}
-	var todoToAdd Todo
 
-	//by using our struct
-	// for i := 0; i < len(Todos); i++ {
-	// 	if Todos[i].Category == category {
-	// 		todosByCategory = append(todosByCategory, Todos[i])
-	// 	}
-	// }
+	err := DB.Where("category = ?", category).Find(&todosByCategory)
 
-	//by using our database & SQL instructions
-	query := `
-    SELECT *
-    FROM todos
-    WHERE category = $1
-`
-	rows, _ := db.Query(query, category)
-	for rows.Next() {
-		rows.Scan(
-			&todoToAdd.Id,
-			&todoToAdd.Title,
-			&todoToAdd.Completed,
-			&todoToAdd.Category,
-			&todoToAdd.Priority,
-			&todoToAdd.CompletedAt,
-			&todoToAdd.DueDate,
-		)
-		todosByCategory = append(todosByCategory, todoToAdd)
+	if err != nil {
+		// code 404 used bec: Todo not found for GET, PUT, or DELETE.
+		c.JSON(404, gin.H{"error": fmt.Sprintf("No todos with category = %s", category)})
+		return
 	}
+
 	c.JSON(200, todosByCategory)
-	rows.Close()
-
-	//LOOP EXPLANATION (for ...)
-
-	// 	rows.Scan importance:
-	// Postgres gives Go a row of raw values (like a slice of interfaces — []interface{}),
-	// but Go has no idea how I want to map them into my struct.
-	// rows.Scan takes those raw column values and copies them into the variables in order.
-
-	//rows.Next usage:
-	// the rows object represents a stream of results coming from the database.
-	// rows.Next() advances to the next row in the result set.
-	// It returns true if there is another row, false if there are no more.
-	//Thats why it's usually called inside a for loop.
 }
 
 func GetTodosByStatus(c *gin.Context) {
@@ -167,28 +96,17 @@ func GetTodosByStatus(c *gin.Context) {
 
 	//the returning response initialized as an empty array of todos
 	todosByStatus := []Todo{}
-	var todoToAdd Todo
 
-	query := `
-    SELECT *
-    FROM todos
-    WHERE completed = $1
-`
-	rows, _ := db.Query(query, stat)
-	for rows.Next() {
-		rows.Scan(
-			&todoToAdd.Id,
-			&todoToAdd.Title,
-			&todoToAdd.Completed,
-			&todoToAdd.Category,
-			&todoToAdd.Priority,
-			&todoToAdd.CompletedAt,
-			&todoToAdd.DueDate,
-		)
-		todosByStatus = append(todosByStatus, todoToAdd)
+	err := DB.Where("completed = ?", stat).Find(&todosByStatus)
+
+	if err != nil {
+		// code 404 used bec: Todo not found for GET, PUT, or DELETE.
+		c.JSON(404, gin.H{"error": fmt.Sprintf("No todos with status = %s", stat)})
+		return
 	}
+
 	c.JSON(200, todosByStatus)
-	rows.Close()
+
 }
 
 func GetTodosBySearch(c *gin.Context) {
@@ -197,29 +115,15 @@ func GetTodosBySearch(c *gin.Context) {
 
 	//the returning response initialized as an empty array of todos
 	todosBySearch := []Todo{}
-	var todoToAdd Todo
 
-	query := `
-    SELECT *
-    FROM todos
-    WHERE title LIKE $1
-`
-	rows, _ := db.Query(query, search+"%")
+	err := DB.Where("title LIKE ?", search).Find(&todosBySearch)
 
-	for rows.Next() {
-		rows.Scan(
-			&todoToAdd.Id,
-			&todoToAdd.Title,
-			&todoToAdd.Completed,
-			&todoToAdd.Category,
-			&todoToAdd.Priority,
-			&todoToAdd.CompletedAt,
-			&todoToAdd.DueDate,
-		)
-		todosBySearch = append(todosBySearch, todoToAdd)
+	if err != nil {
+		// code 404 used bec: Todo not found for GET, PUT, or DELETE.
+		c.JSON(404, gin.H{"error": fmt.Sprintf("No todos have titles that include  '%s'", search)})
+		return
 	}
 	c.JSON(200, todosBySearch)
-	rows.Close()
 }
 
 func CreateTodo(c *gin.Context) {

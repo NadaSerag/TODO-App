@@ -1,9 +1,6 @@
 package main
 
 import (
-	"database/sql"
-	"fmt"
-
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 )
@@ -27,24 +24,17 @@ func initializeTable() {
 func main() {
 	router := gin.Default()
 
-	connectionStr := "postgres://postgres:Mydatabase123@localhost:5432/todo_app?sslmode=disable"
-
-	db, err := sql.Open("postgres", connectionStr)
-
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	fmt.Println("Connected to PostgreSQL, Yayy!")
-	// router.GET("/", func(c *gin.Context) {
-	// 	c.JSON(200, gin.H{
-	// 		"message": "pong",
-	// 	})
-	// })
+	//calling this function to establish connection with our database
+	ConnectToDB()
 
 	//crating the `todos` table in the PostgreSQL database on startup if it doesn’t exist.
 	initializeTable()
+
+	//in GORM:
+	//GET -> Find()
+	//POST -> Create()
+	//PUT -> Update()
+	//DELETE -> Delete()
 
 	router.GET("/todos", GetTodos)
 	router.GET("/todos/:id", GetTodoById)
@@ -59,5 +49,5 @@ func main() {
 
 	router.Run() // listen and serve on 0.0.0.0:8080
 
-	db.Close()
+	//db.Close()
 }
