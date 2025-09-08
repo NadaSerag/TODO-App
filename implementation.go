@@ -12,13 +12,13 @@ import (
 )
 
 type Todo struct {
-	Id          int        `json:"id"`
+	Id          int        `json:"id" gorm:"column:id"`
 	Title       string     `json:"title" binding:"required"`
 	Completed   *bool      `json:"completed" binding:"required"`
 	Category    string     `json:"category" binding:"required"`
 	Priority    string     `json:"priority" binding:"required"`
-	CompletedAt *time.Time `json:"completedAt"`
-	DueDate     *time.Time `json:"dueDate"`
+	CompletedAt *time.Time `json:"completedAt" gorm:"column:completedat"`
+	DueDate     *time.Time `json:"dueDate" gorm:"column:duedate"`
 }
 
 // connection with DSN (Data Source Name) established
@@ -60,9 +60,13 @@ func GetTodoById(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	var todoByIdFound Todo
 
-	err := DB.Find(&todoByIdFound, id)
+	result := DB.Find(&todoByIdFound, id)
 
-	if err != nil {
+	//why not " if result.Error != nil " ?
+	//beacuse updating/deleting/getting a row that doesn’t exist is not considered an error!!
+	//fmt.Println(result.Error)  -> Prints <nil>
+
+	if result.RowsAffected == 0 {
 		// code 404 used bec: Todo not found for GET, PUT, or DELETE.
 		c.JSON(404, gin.H{"error": "Todo not found"})
 		return
@@ -165,21 +169,7 @@ func CreateTodo(c *gin.Context) {
 		return
 	}
 
-	query := `
-        INSERT INTO todos (title, completed, category, priority, completedAt, dueDate)
-        VALUES ($1, $2, $3, $4, $5, $6)
-				RETURNING id
-    `
-
-	db.QueryRow(query,
-		newTodo.Title,
-		newTodo.Completed,
-		newTodo.Category,
-		newTodo.Priority,
-		newTodo.CompletedAt,
-		newTodo.DueDate,
-	).Scan(&newTodo.Id)
-
+	DB.Create(&newTodo)
 	c.JSON(200, newTodo)
 }
 
@@ -214,27 +204,25 @@ func UpdateTodo(c *gin.Context) {
 		return
 	}
 
-	query := `
-        UPDATE todos
-				SET title = $1, completed = $2, category = $3, priority = $4, dueDate = $5
-				WHERE id = $6
-				`
-
 	idToSearchFor, _ := strconv.Atoi(c.Param("id"))
+	var giveID Todo
+	giveID.Id = idToSearchFor
 
-	res, _ := db.Exec(query,
-		updatedTodo.Title,
-		updatedTodo.Completed,
-		updatedTodo.Category,
-		updatedTodo.Priority,
-		updatedTodo.DueDate,
-		idToSearchFor)
+	result := DB.Model(&giveID).Updates(updatedTodo)
 
-	rowsAffected, _ := res.RowsAffected()
-	if rowsAffected == 0 {
+	// if result.Error != nil {
+	// 	c.JSON(404, gin.H{"error": "Todo not found, probably invalid ID"})
+	// 	return
+	// }
+	//fmt.Println(result.Error)
+
+	if result.RowsAffected == 0 {
 		c.JSON(404, gin.H{"error": "Todo not found, probably invalid ID"})
 		return
 	}
+	//why not " if result.Error != nil " ?
+	//beacuse updating/deleting/getting a row that doesn’t exist is not considered an error
+	//fmt.Println(result.Error)  -> Prints <nil>
 
 	if updatedTodo.Completed != nil && *(updatedTodo.Completed) {
 		//placing the time.Now in a variable (type time.Time)
@@ -242,14 +230,12 @@ func UpdateTodo(c *gin.Context) {
 		//taking its address &currentTime to assign it to CompletedAt (pointer to time.Time: type *time.Time)
 		updatedTodo.CompletedAt = &currentTime
 
-		query2 := `
-        UPDATE todos
-				SET completedat = $1
-				WHERE id = $2
-				`
-		db.Exec(query2, currentTime, idToSearchFor)
+		DB.Model(&Todo{}).Where("id = ?", idToSearchFor).Update("completedat", currentTime)
 	}
 
+	if updatedTodo.Completed != nil && !*(updatedTodo.Completed) {
+		DB.Model(&Todo{}).Where("id = ?", idToSearchFor).Update("completedat", nil)
+	}
 	updatedTodo.Id = idToSearchFor
 
 	c.JSON(200, updatedTodo)
@@ -257,8 +243,6 @@ func UpdateTodo(c *gin.Context) {
 
 func UpdateTodosByCategory(c *gin.Context) {
 	var updatedTodos []Todo
-	//Todo variable to 'scan the info to it' in rows.Scan, then add each one to the array updatedTodos
-	var extractedTodo Todo
 	var updatedStat Todo
 
 	categoryToSearchFor := c.Param("category")
@@ -276,43 +260,18 @@ func UpdateTodosByCategory(c *gin.Context) {
 		return
 	}
 
-	query := `
-        UPDATE todos
-				SET completed = $1
-				WHERE category = $2
-				`
-
-	db.Exec(query, updatedStat.Completed, categoryToSearchFor)
+	DB.Model(&Todo{}).Where("category = ?", categoryToSearchFor).Update("completed", updatedStat.Completed)
 
 	if updatedStat.Completed != nil && *(updatedStat.Completed) {
 		currentTime := time.Now()
-
-		query2 := `
-        UPDATE todos
-				SET completedat = $1
-				WHERE category = $2
-				`
-		db.Exec(query2, currentTime, categoryToSearchFor)
+		DB.Model(&Todo{}).Where("category = ?", categoryToSearchFor).Update("completedat", currentTime)
 	}
 
-	query3 := `
-        SELECT * FROM todos
-				WHERE category = $1
-				`
-
-	rows, _ := db.Query(query3, categoryToSearchFor)
-	for rows.Next() {
-		rows.Scan(
-			&extractedTodo.Id,
-			&extractedTodo.Title,
-			&extractedTodo.Completed,
-			&extractedTodo.Category,
-			&extractedTodo.Priority,
-			&extractedTodo.CompletedAt,
-			&extractedTodo.DueDate,
-		)
-		updatedTodos = append(updatedTodos, extractedTodo)
+	if updatedStat.Completed != nil && !*(updatedStat.Completed) {
+		DB.Model(&Todo{}).Where("category = ?", categoryToSearchFor).Update("completedat", nil)
 	}
+
+	DB.Where("category = ?", categoryToSearchFor).Find(&updatedTodos)
 
 	//200 code for Successful PUT
 	c.JSON(200, updatedTodos)
@@ -321,14 +280,16 @@ func UpdateTodosByCategory(c *gin.Context) {
 func DeleteById(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 
-	query := `DELETE FROM todos WHERE id = $1`
-	res, _ := db.Exec(query, id)
+	result := DB.Delete(&Todo{}, id)
 
-	rowsAffected, _ := res.RowsAffected()
-	if rowsAffected == 0 {
+	if result.RowsAffected == 0 {
 		c.JSON(404, gin.H{"error": "Todo not found, probably invalid ID"})
 		return
 	}
+
+	//why not " if result.Error != nil " ?
+	//beacuse updating/deleting/getting a row that doesn’t exist is not considered an error
+	//fmt.Println(result.Error)  -> Prints <nil>
 
 	//200 code for Successful DELETE
 	c.JSON(200, gin.H{"message": "Todo deleted"})
@@ -336,8 +297,8 @@ func DeleteById(c *gin.Context) {
 
 func DeleteAll(c *gin.Context) {
 
-	query := `DELETE FROM todos`
-	db.Exec(query)
+	//deleting a;; rows, soft deletion
+	DB.Where("1 = 1").Delete(&Todo{})
 
 	//200 code for Successful DELETE
 	c.JSON(200, gin.H{"message": "All todos deleted"})
