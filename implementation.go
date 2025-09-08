@@ -21,6 +21,10 @@ type Todo struct {
 	DueDate     *time.Time `json:"dueDate" gorm:"column:duedate"`
 }
 
+type TodoDTO struct {
+	Completed *bool `json:"completed" binding:"required"`
+}
+
 // connection with DSN (Data Source Name) established
 // connectionStr is a formatted string that tells Go’s PostgreSQL driver how to connect to our database.
 var connectionStr = "postgres://postgres:Mydatabase123@localhost:5432/todo_app?sslmode=disable"
@@ -243,7 +247,7 @@ func UpdateTodo(c *gin.Context) {
 
 func UpdateTodosByCategory(c *gin.Context) {
 	var updatedTodos []Todo
-	var updatedStat Todo
+	var updatedStat TodoDTO
 
 	categoryToSearchFor := c.Param("category")
 
