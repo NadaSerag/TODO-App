@@ -18,7 +18,10 @@ func initializeTable() {
         dueDate TIMESTAMP NULL
     );`
 
-	db.Exec(query)
+	DB.Exec(query)
+
+	//OR :
+	//DB.AutoMigrate(&Todo{})
 }
 
 func main() {
