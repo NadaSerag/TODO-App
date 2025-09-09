@@ -51,6 +51,4 @@ func main() {
 	router.DELETE("/todos", DeleteAll)
 
 	router.Run() // listen and serve on 0.0.0.0:8080
-
-	//db.Close()
 }
