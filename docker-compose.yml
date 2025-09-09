@@ -14,7 +14,8 @@ services:
       DB_NAME: todo_app
     depends_on:
       - database
-
+      
+ #container: 2
   database:
     image: postgres:15
     environment:
