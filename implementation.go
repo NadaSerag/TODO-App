@@ -3,7 +3,6 @@ package main
 //file to implement the APIs
 
 import (
-	"database/sql"
 	"fmt"
 	"strconv"
 	"time"
@@ -27,9 +26,9 @@ type TodoDTO struct {
 
 // connection with DSN (Data Source Name) established
 // connectionStr is a formatted string that tells Go’s PostgreSQL driver how to connect to our database.
-var connectionStr = "postgres://postgres:Mydatabase123@localhost:5432/todo_app?sslmode=disable"
+//var connectionStr = "postgres://postgres:Mydatabase123@localhost:5432/todo_app?sslmode=disable"
 
-var db, _ = sql.Open("postgres", connectionStr)
+//var db, _ = sql.Open("postgres", connectionStr)
 
 // - 200: Successful GET, POST, PUT, or DELETE.
 // - 400: Invalid JSON or empty title.
