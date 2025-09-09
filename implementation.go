@@ -87,9 +87,14 @@ func GetTodosByCategory(c *gin.Context) {
 	//the returning response initialized as an empty array of todos
 	todosByCategory := []Todo{}
 
-	err := DB.Where("category = ?", category).Find(&todosByCategory)
+	if !CategoryValid(category) {
+		c.JSON(400, gin.H{"error": "Invalid Category in URL: Category must be Work, Personal, or Study"})
+		return
+	}
 
-	if err != nil {
+	result := DB.Where("category = ?", category).Find(&todosByCategory)
+
+	if result.RowsAffected == 0 {
 		// code 404 used bec: Todo not found for GET, PUT, or DELETE.
 		c.JSON(404, gin.H{"error": fmt.Sprintf("No todos with category = %s", category)})
 		return
@@ -105,9 +110,9 @@ func GetTodosByStatus(c *gin.Context) {
 	//the returning response initialized as an empty array of todos
 	todosByStatus := []Todo{}
 
-	err := DB.Where("completed = ?", stat).Find(&todosByStatus)
+	result := DB.Where("completed = ?", stat).Find(&todosByStatus)
 
-	if err != nil {
+	if result.RowsAffected == 0 {
 		// code 404 used bec: Todo not found for GET, PUT, or DELETE.
 		c.JSON(404, gin.H{"error": fmt.Sprintf("No todos with status = %s", stat)})
 		return
@@ -124,9 +129,9 @@ func GetTodosBySearch(c *gin.Context) {
 	//the returning response initialized as an empty array of todos
 	todosBySearch := []Todo{}
 
-	err := DB.Where("title LIKE ?", search).Find(&todosBySearch)
+	result := DB.Where("title LIKE ?", search).Find(&todosBySearch)
 
-	if err != nil {
+	if result.RowsAffected == 0 {
 		// code 404 used bec: Todo not found for GET, PUT, or DELETE.
 		c.JSON(404, gin.H{"error": fmt.Sprintf("No todos have titles that include  '%s'", search)})
 		return
@@ -171,6 +176,13 @@ func CreateTodo(c *gin.Context) {
 	if err != nil {
 		c.JSON(400, gin.H{"error": "Invalid JSON"})
 		return
+	}
+
+	if newTodo.Completed != nil && *(newTodo.Completed) {
+		//placing the time.Now in a variable (type time.Time)
+		currentTime := time.Now()
+		//taking its address &currentTime to assign it to CompletedAt (pointer to time.Time: type *time.Time)
+		newTodo.CompletedAt = &currentTime
 	}
 
 	DB.Create(&newTodo)
