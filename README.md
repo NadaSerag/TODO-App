@@ -27,6 +27,16 @@ Here are the steps on how to start testing each endpoint. Trust me, it's so much
 
 4- Enter the request body if needed (in JSON)
 
+### Running the App with Docker
+
+1- Build and start the containers by running "docker-compose up --build" in the terminal
+
+2- The API will be available at:
+   http://localhost:8080
+
+3- To stop the containers run "docker-compose down"
+
+
 #### There is a Test Evidence Document provided among the files of this repository, containing screenshots of successful testing of every endpoint. Both the .pdf or .docx versions are available for downloading.
 
 
