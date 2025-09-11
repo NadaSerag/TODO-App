@@ -43,8 +43,9 @@ func GetTodos(c *gin.Context) {
 	//Find() returns a *gorm.DB object (which contains things like error status, rows affected, etc.).
 	result := DB.Find(&allTodos) // SELECT * FROM users;
 
+	//code 500: for Internal server/database error.
 	if result.Error != nil {
-		fmt.Println(result.Error)
+		c.JSON(500, gin.H{"error": result.Error})
 	}
 
 	//just used these lines to make sure everything is going fine:
@@ -111,7 +112,7 @@ func GetTodosByStatus(c *gin.Context) {
 	result := DB.Where("completed = ?", stat).Find(&todosByStatus)
 
 	if result.RowsAffected == 0 {
-		// code 404 used bec: Todo not found for GET, PUT, or DELETE.
+		// code 404 for Resource Not Found
 		c.JSON(404, gin.H{"error": fmt.Sprintf("No todos with status = %s", stat)})
 		return
 	}
