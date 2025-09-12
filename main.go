@@ -33,6 +33,9 @@ func main() {
 	//crating the `todos` table in the PostgreSQL database on startup if it doesn’t exist.
 	initializeTable()
 
+	//GORM's AutoMigrate creates or updates the database schema based on my Go structs.
+	DB.AutoMigrate(&User{})
+
 	//in GORM:
 	//GET -> Find()
 	//POST -> Create()

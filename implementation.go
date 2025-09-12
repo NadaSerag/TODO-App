@@ -10,19 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Todo struct {
-	Id          int        `json:"id" gorm:"column:id"`
-	Title       string     `json:"title" binding:"required"`
-	Completed   *bool      `json:"completed" binding:"required"`
-	Category    string     `json:"category" binding:"required"`
-	Priority    string     `json:"priority" binding:"required"`
-	CompletedAt *time.Time `json:"completedAt" gorm:"column:completedat"`
-	DueDate     *time.Time `json:"dueDate" gorm:"column:duedate"`
-}
 
-type TodoDTO struct {
-	Completed *bool `json:"completed" binding:"required"`
-}
 
 // connectionStr is a formatted string that tells Go’s PostgreSQL driver how to connect to our database.
 //var connectionStr = "postgres://postgres:Mydatabase123@localhost:5432/todo_app?sslmode=disable"
