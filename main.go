@@ -48,6 +48,8 @@ func main() {
 	router.GET("/todos/status/:status", GetTodosByStatus)
 	router.GET("/todos/search/", GetTodosBySearch)
 	router.POST("/todos", CreateTodo)
+	router.POST("/signup", SignUp)
+	router.POST("/login", LogIn)
 	router.PUT("/todos/:id", UpdateTodo)
 	router.PUT("/todos/category/:category", UpdateTodosByCategory)
 	router.DELETE("/todos/:id", DeleteById)
