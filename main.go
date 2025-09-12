@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/NadaSerag/role-playing-game/restAPI-TodoAPP/middleware"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 )
@@ -47,7 +48,7 @@ func main() {
 	router.GET("/todos/category/:category", GetTodosByCategory)
 	router.GET("/todos/status/:status", GetTodosByStatus)
 	router.GET("/todos/search/", GetTodosBySearch)
-	router.POST("/todos", CreateTodo)
+	router.POST("/todos", middleware.RequireAuth, CreateTodo)
 	router.POST("/signup", SignUp)
 	router.POST("/login", LogIn)
 	router.PUT("/todos/:id", UpdateTodo)
