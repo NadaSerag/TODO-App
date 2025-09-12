@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/NadaSerag/role-playing-game/restAPI-TodoAPP/middleware"
+	"github.com/NadaSerag/TODO-App/middleware"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 )

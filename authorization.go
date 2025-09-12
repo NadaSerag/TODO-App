@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/NadaSerag/TODO-App/structs"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"

@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"todo-app-gorm/structs"
+	"github.com/NadaSerag/TODO-App/structs"
 	"github.com/gin-gonic/gin"
 )
 
