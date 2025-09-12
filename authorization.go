@@ -86,6 +86,7 @@ func LogIn(c *gin.Context) {
 	}
 
 	//returning the JWT (the string token) in the response
-	c.JSON(200, tokenString)
+	c.JSON(200, gin.H{"token": tokenString})
 
+	//set Cookie ?
 }
