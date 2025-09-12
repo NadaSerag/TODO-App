@@ -7,10 +7,9 @@ import (
 	"strconv"
 	"time"
 
+	"todo-app-gorm/structs"
 	"github.com/gin-gonic/gin"
 )
-
-
 
 // connectionStr is a formatted string that tells Go’s PostgreSQL driver how to connect to our database.
 //var connectionStr = "postgres://postgres:Mydatabase123@localhost:5432/todo_app?sslmode=disable"

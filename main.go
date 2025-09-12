@@ -48,7 +48,7 @@ func main() {
 	router.GET("/todos/category/:category", GetTodosByCategory)
 	router.GET("/todos/status/:status", GetTodosByStatus)
 	router.GET("/todos/search/", GetTodosBySearch)
-	router.POST("/todos", middleware.RequireAuth, CreateTodo)
+	router.POST("/todos", middleware.RequireAuthentication, CreateTodo)
 	router.POST("/signup", SignUp)
 	router.POST("/login", LogIn)
 	router.PUT("/todos/:id", UpdateTodo)

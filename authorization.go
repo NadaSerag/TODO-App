@@ -71,10 +71,11 @@ func LogIn(c *gin.Context) {
 	// Create a new token object, specifying signing method and the claims
 	// you would like it to contain.
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id":         presentUser.ID,
-		"username":   presentUser.Username,
-		"role":       presentUser.Role,
-		"expiration": time.Now().Add(time.Hour * 24 * 30).Unix(),
+		"sub":      presentUser.ID,
+		"username": presentUser.Username,
+		"role":     presentUser.Role,
+		//expires in 24 hrs
+		"exp": time.Now().Add(time.Hour * 24).Unix(),
 	})
 
 	// Sign and get the complete encoded token as a string using the secret
@@ -90,4 +91,3 @@ func LogIn(c *gin.Context) {
 
 	//set Cookie ?
 }
-

@@ -1,4 +1,4 @@
-module github.com/NadaSerag/role-playing-game/restAPI-TodoAPP
+module github.com/NadaSerag/TODO-App
 
 go 1.25.0
 
