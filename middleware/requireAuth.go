@@ -9,7 +9,7 @@ import (
 )
 
 type Claims struct {
-	UserID   int    `json:"userID"`
+	UserID   int    `json:"id"`
 	Username string `json:"username"`
 	Role     string `json:"role"`
 	jwt.RegisteredClaims
@@ -61,7 +61,8 @@ func RequireAuthentication(c *gin.Context) {
 		return
 	}
 
-	// Save claims in context (so handlers can use them)
+	// Putting claims it in context under "user"
+	// and Handlers know they can grab "user" to see who is logged in.
 	c.Set("user", claims)
 	c.Next()
 }
