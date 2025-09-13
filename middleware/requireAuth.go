@@ -42,6 +42,7 @@ func RequireAuthentication(c *gin.Context) {
 	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 
 	// Parsing and validating token
+	//"claims" is a POINTER to a Claims struct
 	claims := &Claims{}
 
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
@@ -67,6 +68,7 @@ func RequireAuthentication(c *gin.Context) {
 
 	// Putting claims it in context under "user"
 	// and Handlers know they can grab "user" to see who is logged in.
+	//storing a pointer to Claims in Gin’s context under the key "user".
 	c.Set("user", claims)
 
 	fmt.Println("Passed Middleware")
@@ -75,5 +77,19 @@ func RequireAuthentication(c *gin.Context) {
 
 func RequireAuthorization(c *gin.Context) {
 
-	c.Next()
+	gottenClaims, exists_ok := GetUserClaims(c)
+
+	everythingOk := ClaimsCheck(c, gottenClaims, exists_ok)
+
+	//if false if returned by ClaimsCheck, then it c.aborted in the function ClaimsCheck already, so we just exit (return)
+	if !everythingOk {
+		return
+	}
+
+	//now we can use the claims returned from GetUserClaims safely without a worry in the world
+	if gottenClaims.Role == "admin" {
+		fmt.Println("Admin authorized, passed to route successfully")
+		//Congrats! Now you're authorized — continue to the route function
+		c.Next()
+	}
 }
