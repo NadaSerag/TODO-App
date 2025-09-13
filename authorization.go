@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/NadaSerag/TODO-App/structs"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
@@ -72,7 +71,7 @@ func LogIn(c *gin.Context) {
 	// Create a new token object, specifying signing method and the claims
 	// you would like it to contain.
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub":      presentUser.ID,
+		"id":      presentUser.ID,
 		"username": presentUser.Username,
 		"role":     presentUser.Role,
 		//expires in 24 hrs
