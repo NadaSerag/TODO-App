@@ -3,6 +3,7 @@ package middleware
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -14,6 +15,9 @@ type Claims struct {
 	Role     string `json:"role"`
 	jwt.RegisteredClaims
 }
+
+// the "secret" to generate the JWT with
+var JwtSecret = []byte("verylongheybkhdbsuhoeua569u985wcthrq3cjktbx4j")
 
 // The "jwt.RegisteredClaims" (from github.com/golang-jwt/jwt/v5)
 // includes a set of standard JWT fields which are:
@@ -40,13 +44,20 @@ func RequireAuthentication(c *gin.Context) {
 
 	//extracting the token from the request header which looks like: Authorization: Bearer eyJhbGc6..(token)...
 	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+	fmt.Println("tokenString = ", tokenString)
+	fmt.Println("authHeader = ", authHeader)
 
 	// Parsing and validating token
 	//"claims" is a POINTER to a Claims struct
 	claims := &Claims{}
 
+	// 	jwt.ParseWithClaims takes a JWT string verifies it, and decodes the claims into the struct you provide.
+	// It does 3 big jobs:
+	// Splits the token into header.payload.signature.
+	// Verifies the signature using the secret.
+	// Decodes the payload into your struct (Claims).
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-		return []byte("verylongheybkhdbsuhoeua569u985wcthrq3cjktbx4j"), nil
+		return JwtSecret, nil
 	})
 
 	if err != nil || !token.Valid {
@@ -60,17 +71,17 @@ func RequireAuthentication(c *gin.Context) {
 	//claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Hour * 24))
 
 	fmt.Println("ExpiresAt:", claims.ExpiresAt) // should NOT be nil
-	// if tokenn=.ExpiresAt == nil {
-	// 	c.JSON(401, gin.H{"error": "expiry date is nil!"})
-	// 	c.Abort()
-	// 	return
-	// }
+	if claims.ExpiresAt == nil {
+		c.JSON(401, gin.H{"error": "expiry date is nil!"})
+		c.Abort()
+		return
+	}
 
-	// if tokenn.ExpiresAt.Time.Before(time.Now()) {
-	// 	c.JSON(401, gin.H{"error": "token expired: 2nd check failure"})
-	// 	c.Abort()
-	// 	return
-	// }
+	if claims.ExpiresAt.Time.Before(time.Now()) {
+		c.JSON(401, gin.H{"error": "token expired: 2nd check failure"})
+		c.Abort()
+		return
+	}
 
 	// Putting claims it in context under "user"
 	// and Handlers know they can grab "user" to see who is logged in.
@@ -88,7 +99,7 @@ func RequireAuthorization(c *gin.Context) {
 
 	everythingOk := ClaimsCheck(c, gottenClaims, exists_ok)
 
-	//if false if returned by ClaimsCheck, then it c.aborted in the function ClaimsCheck already, so we just exit (return)
+	//	if false if returned by ClaimsCheck, then it c.aborted in the function ClaimsCheck already, so we just exit (return)
 	if !everythingOk {
 		return
 	}
@@ -98,5 +109,9 @@ func RequireAuthorization(c *gin.Context) {
 		fmt.Println("Admin authorized, passed to route successfully")
 		//Congrats! Now you're authorized — continue to the route function
 		c.Next()
+	} else {
+		c.JSON(403, gin.H{"message": "Forbidden (user lacks permission to delete ALL todos in the entire database)."})
+		c.Abort()
+		return
 	}
 }

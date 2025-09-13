@@ -69,6 +69,8 @@ func LogIn(c *gin.Context) {
 		return
 	}
 
+	// Create a new token object, specifying signing method and the claims
+	// you would like it to contain.
 	claims := middleware.Claims{
 		UserID:   presentUser.ID,
 		Username: presentUser.Username,
@@ -78,12 +80,14 @@ func LogIn(c *gin.Context) {
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
-	// Create a new token object, specifying signing method and the claims
-	// you would like it to contain.
+
+	// jwt.NewWithClaims creates a new JWT object (an in-memory representation of a token but not signed yet) using:
+	//1-  A signing method (like HS256, RS256, etc.)
+	//2-  A claims object (the payload of the token)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	// Sign and get the complete encoded token as a string using the secret
-	tokenString, err3 := token.SignedString([]byte("verylongheybkhdbsuhoeua569u985wcthrq3cjktbx4j"))
+	// Signing the token (turn it into a string) using the "secret" which is "verylongheybkhdbsuhoeua569u985wcthrq3cjktbx4j"
+	tokenString, err3 := token.SignedString(middleware.JwtSecret)
 
 	if err3 != nil {
 		c.JSON(400, gin.H{"error": "Failed to create token"})
