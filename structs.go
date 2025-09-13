@@ -10,6 +10,7 @@ type Todo struct {
 	Priority    string     `json:"priority" binding:"required"`
 	CompletedAt *time.Time `json:"completedAt" gorm:"column:completedat"`
 	DueDate     *time.Time `json:"dueDate" gorm:"column:duedate"`
+	UserID      int        `json:"user_id" gorm:"column:userid"`
 }
 
 type TodoDTO struct {

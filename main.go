@@ -6,25 +6,6 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func initializeTable() {
-	//'query' parameter variable for db.Exec(...)
-	query := `
-    CREATE TABLE IF NOT EXISTS todos (
-        id SERIAL PRIMARY KEY,
-        title TEXT NOT NULL,
-        completed BOOLEAN DEFAULT FALSE,
-        category TEXT,
-        priority TEXT,
-        completedAt TIMESTAMP NULL,
-        dueDate TIMESTAMP NULL
-    );`
-
-	DB.Exec(query)
-
-	//OR :
-	//DB.AutoMigrate(&Todo{})
-}
-
 func main() {
 	router := gin.Default()
 
@@ -32,7 +13,7 @@ func main() {
 	ConnectToDB()
 
 	//crating the `todos` table in the PostgreSQL database on startup if it doesn’t exist.
-	initializeTable()
+	DB.AutoMigrate(&Todo{})
 
 	//GORM's AutoMigrate creates or updates the database schema based on my Go structs.
 	DB.AutoMigrate(&User{})

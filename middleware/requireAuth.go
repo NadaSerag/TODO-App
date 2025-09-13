@@ -50,24 +50,32 @@ func RequireAuthentication(c *gin.Context) {
 		return []byte("super-secret-key"), nil
 	})
 
+	tokenn, ok := token.Claims.(*Claims)
+
+	if !ok {
+		c.JSON(401, gin.H{"error": "claims are of unexpected type"})
+		c.Abort()
+		return
+	}
+
 	if err != nil || !token.Valid {
 		c.JSON(401, gin.H{"error": "invalid token"})
 		c.Abort()
 		return
 	}
 
-	// // Checking expiration
-	// 	RegisteredClaims: jwt.RegisteredClaims{
-	//           ExpiresAt: jwt.NewNumericDate(exp)
-	//           IssuedAt:  jwt.NewNumericDate(time.Now())
-	//       }
-	if claims.ExpiresAt == nil {
+	//tokenn.ExpiresAt = "1757853813"
+	//jwt.NewNumericDate(time.Unix(1757853813, 0)),
+	tokenn.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Hour * 24))
+
+	fmt.Println("ExpiresAt:", tokenn.ExpiresAt) // should NOT be nil
+	if tokenn.ExpiresAt == nil {
 		c.JSON(401, gin.H{"error": "expiry date is nil!"})
 		c.Abort()
 		return
 	}
 
-	if claims.ExpiresAt.Time.Before(time.Now()) {
+	if tokenn.ExpiresAt.Time.Before(time.Now()) {
 		c.JSON(401, gin.H{"error": "token expired: 2nd check failure"})
 		c.Abort()
 		return

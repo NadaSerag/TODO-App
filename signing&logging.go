@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/NadaSerag/TODO-App/middleware"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
@@ -68,17 +69,18 @@ func LogIn(c *gin.Context) {
 		return
 	}
 
+	claims := middleware.Claims{
+		UserID:   presentUser.ID,
+		Username: presentUser.Username,
+		Role:     presentUser.Role,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+	}
 	// Create a new token object, specifying signing method and the claims
 	// you would like it to contain.
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id":       presentUser.ID,
-		"username": presentUser.Username,
-		"role":     presentUser.Role,
-		//expires in 24 hrs:
-		"exp": jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
-		//issued at:
-		"iat": jwt.NewNumericDate(time.Now()),
-	})
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	// Sign and get the complete encoded token as a string using the secret
 	tokenString, err3 := token.SignedString([]byte("super-secret-key"))
