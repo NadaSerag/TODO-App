@@ -3,14 +3,13 @@ package middleware
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
 
 type Claims struct {
-	UserID   int    `json:"id"`
+	UserID   int    `json:"user_id"`
 	Username string `json:"username"`
 	Role     string `json:"role"`
 	jwt.RegisteredClaims
@@ -47,16 +46,8 @@ func RequireAuthentication(c *gin.Context) {
 	claims := &Claims{}
 
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-		return []byte("super-secret-key"), nil
+		return []byte("verylongheybkhdbsuhoeua569u985wcthrq3cjktbx4j"), nil
 	})
-
-	tokenn, ok := token.Claims.(*Claims)
-
-	if !ok {
-		c.JSON(401, gin.H{"error": "claims are of unexpected type"})
-		c.Abort()
-		return
-	}
 
 	if err != nil || !token.Valid {
 		c.JSON(401, gin.H{"error": "invalid token"})
@@ -66,26 +57,27 @@ func RequireAuthentication(c *gin.Context) {
 
 	//tokenn.ExpiresAt = "1757853813"
 	//jwt.NewNumericDate(time.Unix(1757853813, 0)),
-	tokenn.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Hour * 24))
+	//claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Hour * 24))
 
-	fmt.Println("ExpiresAt:", tokenn.ExpiresAt) // should NOT be nil
-	if tokenn.ExpiresAt == nil {
-		c.JSON(401, gin.H{"error": "expiry date is nil!"})
-		c.Abort()
-		return
-	}
+	fmt.Println("ExpiresAt:", claims.ExpiresAt) // should NOT be nil
+	// if tokenn=.ExpiresAt == nil {
+	// 	c.JSON(401, gin.H{"error": "expiry date is nil!"})
+	// 	c.Abort()
+	// 	return
+	// }
 
-	if tokenn.ExpiresAt.Time.Before(time.Now()) {
-		c.JSON(401, gin.H{"error": "token expired: 2nd check failure"})
-		c.Abort()
-		return
-	}
+	// if tokenn.ExpiresAt.Time.Before(time.Now()) {
+	// 	c.JSON(401, gin.H{"error": "token expired: 2nd check failure"})
+	// 	c.Abort()
+	// 	return
+	// }
 
 	// Putting claims it in context under "user"
 	// and Handlers know they can grab "user" to see who is logged in.
 	//storing a pointer to Claims in Gin’s context under the key "user".
 	c.Set("user", claims)
 
+	fmt.Println(claims)
 	fmt.Println("Passed Middleware")
 	c.Next()
 }

@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/NadaSerag/TODO-App/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -136,6 +137,16 @@ func CreateTodo(c *gin.Context) {
 	//returns an error, error is = nil if JSON parses successfully
 	err := c.ShouldBindJSON(&newTodo)
 
+	gottenClaims, exists_ok := middleware.GetUserClaims(c)
+
+	everythingOk := middleware.ClaimsCheck(c, gottenClaims, exists_ok)
+
+	
+	//if false if returned by ClaimsCheck, then it c.aborted in the function ClaimsCheck already, so we just exit (return)
+	if !everythingOk {
+		return
+	}
+
 	//checking if the title is empty
 	if newTodo.Title == "" {
 		c.JSON(400, gin.H{"error": "Title cannot be empty"})
@@ -163,12 +174,16 @@ func CreateTodo(c *gin.Context) {
 		return
 	}
 
+	//SETTING COMPLETION STAT
 	if newTodo.Completed != nil && *(newTodo.Completed) {
 		//placing the time.Now in a variable (type time.Time)
 		currentTime := time.Now()
 		//taking its address &currentTime to assign it to CompletedAt (pointer to time.Time: type *time.Time)
 		newTodo.CompletedAt = &currentTime
 	}
+
+	//SETTING USER_ID
+	newTodo.UserID = gottenClaims.UserID
 
 	DB.Create(&newTodo)
 	c.JSON(200, newTodo)

@@ -83,7 +83,7 @@ func LogIn(c *gin.Context) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	// Sign and get the complete encoded token as a string using the secret
-	tokenString, err3 := token.SignedString([]byte("super-secret-key"))
+	tokenString, err3 := token.SignedString([]byte("verylongheybkhdbsuhoeua569u985wcthrq3cjktbx4j"))
 
 	if err3 != nil {
 		c.JSON(400, gin.H{"error": "Failed to create token"})

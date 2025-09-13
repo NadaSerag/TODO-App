@@ -35,7 +35,7 @@ func main() {
 	router.PUT("/todos/:id", UpdateTodo)
 	router.PUT("/todos/category/:category", UpdateTodosByCategory)
 	router.DELETE("/todos/:id", DeleteById)
-	router.DELETE("/todos", DeleteAll)
+	router.DELETE("/todos", middleware.RequireAuthorization, DeleteAll)
 
 	router.Run() // listen and serve on 0.0.0.0:8080
 }
