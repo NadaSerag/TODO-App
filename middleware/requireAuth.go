@@ -1,8 +1,8 @@
 package middleware
 
 import (
+	"fmt"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -54,16 +54,22 @@ func RequireAuthentication(c *gin.Context) {
 		return
 	}
 
-	// Checking expiration
-	if claims.ExpiresAt.Time.Before(time.Now()) {
-		c.JSON(401, gin.H{"error": "token expired"})
-		c.Abort()
-		return
-	}
+	// // Checking expiration
+	// 	RegisteredClaims: jwt.RegisteredClaims{
+	//           ExpiresAt: jwt.NewNumericDate(exp)
+	//           IssuedAt:  jwt.NewNumericDate(time.Now())
+	//       }
+	// if claims.ExpiresAt == nil || claims.ExpiresAt.Time.Before(time.Now()) {
+	// 	c.JSON(401, gin.H{"error": "token expired"})
+	// 	c.Abort()
+	// 	return
+	// }
 
 	// Putting claims it in context under "user"
 	// and Handlers know they can grab "user" to see who is logged in.
 	c.Set("user", claims)
+
+	fmt.Println("Passed Middleware")
 	c.Next()
 }
 
