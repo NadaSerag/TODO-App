@@ -75,9 +75,9 @@ func LogIn(c *gin.Context) {
 		"username": presentUser.Username,
 		"role":     presentUser.Role,
 		//expires in 24 hrs:
-		"exp": time.Now().Add(time.Hour * 24).Unix(),
+		"exp": jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
 		//issued at:
-		"iat": time.Now().Unix(),
+		"iat": jwt.NewNumericDate(time.Now()),
 	})
 
 	// Sign and get the complete encoded token as a string using the secret
