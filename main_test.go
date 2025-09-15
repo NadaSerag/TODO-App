@@ -39,7 +39,11 @@ func TestMain(m *testing.M) {
 
 	//router := gin.Default()
 
-	//router.GET("/todos", TestGetTodos)
+	// router.ServeHTTP(w, req) checks the registered routes.
+	// If /todos is not registered → 404.
+	// So it's a MUST to register GetTodos on /todos, the router knows which handler to call.
+	router.GET("/todos", GetTodos)
+
 	//router.GET("/todos/:id", TestGetTodoById)
 	//router.Run()
 
@@ -66,6 +70,9 @@ func TestGetTodos(t *testing.T) {
 	// 	router.ServeHTTP(w, req) internally creates the *gin.Context and passes it to GetTodos(c* gin.Context) handler function.
 	//  therefore no need to manually create c *gin.Context.
 	router.ServeHTTP(w, req)
+	// router.ServeHTTP(w, req) checks the registered routes.
+	// If /todos is not registered → 404.
+	// So it's a MUST to register GetTodos on /todos, the router knows which handler to call.
 
 	//checking if the code is 200 (SUCCESS)
 	if w.Code != 200 {
