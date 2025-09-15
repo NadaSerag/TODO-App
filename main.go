@@ -32,9 +32,9 @@ func main() {
 	router.POST("/todos", middleware.RequireAuthentication, CreateTodo)
 	router.POST("/signup", SignUp)
 	router.POST("/login", LogIn)
-	router.PUT("/todos/:id", UpdateTodo)
-	router.PUT("/todos/category/:category", UpdateTodosByCategory)
-	router.DELETE("/todos/:id", DeleteById)
+	router.PUT("/todos/:id", middleware.RequireAuthentication, UpdateTodo)
+	router.PUT("/todos/category/:category", middleware.RequireAuthentication, UpdateTodosByCategory)
+	router.DELETE("/todos/:id", middleware.RequireAuthentication, DeleteById)
 	router.DELETE("/todos", middleware.RequireAuthentication, middleware.RequireAuthorization, DeleteAll)
 
 	router.Run() // listen and serve on 0.0.0.0:8080

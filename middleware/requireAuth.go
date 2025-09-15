@@ -70,7 +70,7 @@ func RequireAuthentication(c *gin.Context) {
 	//jwt.NewNumericDate(time.Unix(1757853813, 0)),
 	//claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Hour * 24))
 
-	fmt.Println("ExpiresAt:", claims.ExpiresAt) // should NOT be nil
+	// fmt.Println("ExpiresAt:", claims.ExpiresAt) // should NOT be nil
 	if claims.ExpiresAt == nil {
 		c.JSON(401, gin.H{"error": "expiry date is nil!"})
 		c.Abort()
