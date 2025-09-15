@@ -38,4 +38,9 @@ func main() {
 	router.DELETE("/todos", middleware.RequireAuthentication, middleware.RequireAuthorization, DeleteAll)
 
 	router.Run() // listen and serve on 0.0.0.0:8080
+
+	//closing our database
+	sqlDatabase, _ := DB.DB()
+	sqlDatabase.Close()
+
 }

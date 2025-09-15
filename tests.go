@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -9,6 +10,8 @@ import (
 func TestMain(m *testing.M) {
 
 	gin.SetMode(gin.TestMode)
+	ConnectToDB()
+
 	//setting up the TEST database (for testing purposes only)
 	query := `
     CREATE TABLE IF NOT EXISTS test_todos (
@@ -34,4 +37,23 @@ func TestMain(m *testing.M) {
 
 	//router.GET("/todos", TestGetTodos)
 	//router.GET("/todos/:id", TestGetTodoById)
+	//router.Run()
+
+	code := m.Run() // <--- runs all tests
+	// 	m.Run() executes all tests in the package (TestXXX functions).
+	// It returns an exit code:
+	// 0 → all tests passed
+	// non-zero → some tests failed
+
+	// teardown code before os.Exit()
+	sqlDatabase, _ := DB.DB()
+	sqlDatabase.Close()
+
+	//os.Exit(code) sends a “pass/fail” signal (depending on the code variable returned from m.Run())to the test runner.
+	// The runner reads that code and prints PASS or FAIL in your terminal.
+	os.Exit(code)
+}
+
+func TestGetTodos(c *gin.Context) {
+
 }
