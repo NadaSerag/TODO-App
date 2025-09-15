@@ -5,13 +5,14 @@ import (
 	"time"
 
 	"github.com/NadaSerag/TODO-App/middleware"
+	"github.com/NadaSerag/TODO-App/structs"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func SignUp(c *gin.Context) {
-	var newUser User
+	var newUser structs.User
 
 	//assigning values in the sent JSON to the attrivutes in out newUser struct
 	err := c.ShouldBindJSON(&newUser)
@@ -41,11 +42,11 @@ func SignUp(c *gin.Context) {
 	DB.Create(&newUser)
 
 	//returning response only with UserDTO taht doesn't contain the password
-	c.JSON(200, ToUserDTO(newUser))
+	c.JSON(200, structs.ToUserDTO(newUser))
 }
 
 func LogIn(c *gin.Context) {
-	var loggingUser User
+	var loggingUser structs.User
 
 	err := c.ShouldBindJSON(&loggingUser)
 	if err != nil {
@@ -53,7 +54,7 @@ func LogIn(c *gin.Context) {
 		return
 	}
 
-	var presentUser User
+	var presentUser structs.User
 	result := DB.Where("username = ?", loggingUser.Username).Find(&presentUser)
 
 	if result.RowsAffected == 0 {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/NadaSerag/TODO-App/middleware"
+	"github.com/NadaSerag/TODO-App/structs"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 )
@@ -13,10 +14,10 @@ func main() {
 	ConnectToDB()
 
 	//crating the `todos` table in the PostgreSQL database on startup if it doesn’t exist.
-	DB.AutoMigrate(&Todo{})
+	DB.AutoMigrate(&structs.Todo{})
 
 	//GORM's AutoMigrate creates or updates the database schema based on my Go structs.
-	DB.AutoMigrate(&User{})
+	DB.AutoMigrate(&structs.Todo{})
 
 	//in GORM:
 	//GET -> Find()

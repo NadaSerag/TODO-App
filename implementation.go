@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/NadaSerag/TODO-App/middleware"
+	"github.com/NadaSerag/TODO-App/structs"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,7 +26,7 @@ import (
 // the parameter is by convention named "c".
 
 func GetTodos(c *gin.Context) {
-	allTodos := []Todo{}
+	allTodos := []structs.Todo{}
 
 	//Find() returns a *gorm.DB object (which contains things like error status, rows affected, etc.).
 	result := DB.Find(&allTodos) // SELECT * FROM users;
@@ -48,7 +49,7 @@ func GetTodoById(c *gin.Context) {
 	//c.Param(...) returns the value as a string.
 	//thats wy we need to convert it to an int by strconv.Atoi
 	id, _ := strconv.Atoi(c.Param("id"))
-	var todoByIdFound Todo
+	var todoByIdFound structs.Todo
 
 	result := DB.Find(&todoByIdFound, id)
 
@@ -71,7 +72,7 @@ func GetTodosByCategory(c *gin.Context) {
 	category := c.Param("category")
 
 	//the returning response initialized as an empty array of todos
-	todosByCategory := []Todo{}
+	todosByCategory := []structs.Todo{}
 
 	if !CategoryValid(category) {
 		c.JSON(400, gin.H{"error": "Invalid Category in URL: Category must be Work, Personal, or Study"})
@@ -94,7 +95,7 @@ func GetTodosByStatus(c *gin.Context) {
 	stat := c.Param("status")
 
 	//the returning response initialized as an empty array of todos
-	todosByStatus := []Todo{}
+	todosByStatus := []structs.Todo{}
 
 	result := DB.Where("completed = ?", stat).Find(&todosByStatus)
 
@@ -113,7 +114,7 @@ func GetTodosBySearch(c *gin.Context) {
 	search := c.Query("q")
 
 	//the returning response initialized as an empty array of todos
-	todosBySearch := []Todo{}
+	todosBySearch := []structs.Todo{}
 
 	result := DB.Where("title LIKE ?", search).Find(&todosBySearch)
 
@@ -126,7 +127,7 @@ func GetTodosBySearch(c *gin.Context) {
 }
 
 func CreateTodo(c *gin.Context) {
-	var newTodo Todo
+	var newTodo structs.Todo
 
 	//VERY IMPORTANT: reading the request body (JSON)
 
@@ -141,7 +142,6 @@ func CreateTodo(c *gin.Context) {
 
 	everythingOk := middleware.ClaimsCheck(c, gottenClaims, exists_ok)
 
-	
 	//if false if returned by ClaimsCheck, then it c.aborted in the function ClaimsCheck already, so we just exit (return)
 	if !everythingOk {
 		return
@@ -191,7 +191,7 @@ func CreateTodo(c *gin.Context) {
 
 func UpdateTodo(c *gin.Context) {
 
-	var updatedTodo Todo
+	var updatedTodo structs.Todo
 	err := c.ShouldBindJSON(&updatedTodo)
 
 	if updatedTodo.Title == "" {
@@ -221,7 +221,7 @@ func UpdateTodo(c *gin.Context) {
 	}
 
 	idToSearchFor, _ := strconv.Atoi(c.Param("id"))
-	var giveID Todo
+	var giveID structs.Todo
 	giveID.Id = idToSearchFor
 
 	result := DB.Model(&giveID).Updates(updatedTodo)
@@ -246,11 +246,11 @@ func UpdateTodo(c *gin.Context) {
 		//taking its address &currentTime to assign it to CompletedAt (pointer to time.Time: type *time.Time)
 		updatedTodo.CompletedAt = &currentTime
 
-		DB.Model(&Todo{}).Where("id = ?", idToSearchFor).Update("completedat", currentTime)
+		DB.Model(&structs.Todo{}).Where("id = ?", idToSearchFor).Update("completedat", currentTime)
 	}
 
 	if updatedTodo.Completed != nil && !*(updatedTodo.Completed) {
-		DB.Model(&Todo{}).Where("id = ?", idToSearchFor).Update("completedat", nil)
+		DB.Model(&structs.Todo{}).Where("id = ?", idToSearchFor).Update("completedat", nil)
 	}
 	updatedTodo.Id = idToSearchFor
 
@@ -258,8 +258,8 @@ func UpdateTodo(c *gin.Context) {
 }
 
 func UpdateTodosByCategory(c *gin.Context) {
-	var updatedTodos []Todo
-	var updatedStat TodoDTO
+	var updatedTodos []structs.Todo
+	var updatedStat structs.TodoDTO
 
 	categoryToSearchFor := c.Param("category")
 
@@ -276,15 +276,15 @@ func UpdateTodosByCategory(c *gin.Context) {
 		return
 	}
 
-	DB.Model(&Todo{}).Where("category = ?", categoryToSearchFor).Update("completed", updatedStat.Completed)
+	DB.Model(&structs.Todo{}).Where("category = ?", categoryToSearchFor).Update("completed", updatedStat.Completed)
 
 	if updatedStat.Completed != nil && *(updatedStat.Completed) {
 		currentTime := time.Now()
-		DB.Model(&Todo{}).Where("category = ?", categoryToSearchFor).Update("completedat", currentTime)
+		DB.Model(&structs.Todo{}).Where("category = ?", categoryToSearchFor).Update("completedat", currentTime)
 	}
 
 	if updatedStat.Completed != nil && !*(updatedStat.Completed) {
-		DB.Model(&Todo{}).Where("category = ?", categoryToSearchFor).Update("completedat", nil)
+		DB.Model(&structs.Todo{}).Where("category = ?", categoryToSearchFor).Update("completedat", nil)
 	}
 
 	DB.Where("category = ?", categoryToSearchFor).Find(&updatedTodos)
@@ -296,7 +296,7 @@ func UpdateTodosByCategory(c *gin.Context) {
 func DeleteById(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 
-	result := DB.Delete(&Todo{}, id)
+	result := DB.Delete(&structs.Todo{}, id)
 
 	if result.RowsAffected == 0 {
 		c.JSON(404, gin.H{"error": "Todo not found, probably invalid ID"})
@@ -314,7 +314,7 @@ func DeleteById(c *gin.Context) {
 func DeleteAll(c *gin.Context) {
 
 	//deleting a;; rows, soft deletion
-	DB.Where("1 = 1").Delete(&Todo{})
+	DB.Where("1 = 1").Delete(&structs.Todo{})
 
 	//200 code for Successful DELETE
 	c.JSON(200, gin.H{"message": "All todos deleted"})
