@@ -1,11 +1,15 @@
 package main
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 
 	"github.com/gin-gonic/gin"
 )
+
+var router = gin.Default()
 
 func TestMain(m *testing.M) {
 
@@ -54,6 +58,20 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func TestGetTodos(c *gin.Context) {
+func TestGetTodos(t *testing.T) {
+
+	req, _ := http.NewRequest("GET", "/todos", nil)
+	w := httptest.NewRecorder()
+
+	// 	router.ServeHTTP(w, req) internally creates the *gin.Context and passes it to GetTodos(c* gin.Context) handler function.
+	//  therefore no need to manually create c *gin.Context.
+	router.ServeHTTP(w, req)
+
+	//checking if the code is 200 (SUCCESS)
+	if w.Code != 200 {
+		t.Fatalf("Expected 200 OK, got %d", w.Code)
+	}
+
+	t.Log("Response body:", w.Body.String())
 
 }
