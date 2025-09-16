@@ -1,8 +1,6 @@
 package main
 
 import (
-	"net/http"
-	"net/http/httptest"
 	"os"
 	"testing"
 
@@ -10,6 +8,9 @@ import (
 )
 
 var router = gin.Default()
+
+var completed = true
+var notCompleted = false
 
 func TestMain(m *testing.M) {
 
@@ -30,12 +31,10 @@ func TestMain(m *testing.M) {
 
 	DB.Exec(query)
 
-	completed := true
-	notCompleted := false
 	Todo1 := Todo{Title: "Join Meeting", Completed: &completed, Category: "Work", Priority: "High"}
 	Todo2 := Todo{Title: "Go Training", Completed: &notCompleted, Category: "Personal", Priority: "Medium"}
-	DB.Create(&Todo1)
-	DB.Create(&Todo2)
+	DB.Table("test_todos").Create(&Todo1)
+	DB.Table("test_todos").Create(&Todo2)
 
 	//router := gin.Default()
 
@@ -60,25 +59,4 @@ func TestMain(m *testing.M) {
 	//os.Exit(code) sends a “pass/fail” signal (depending on the code variable returned from m.Run())to the test runner.
 	// The runner reads that code and prints PASS or FAIL in your terminal.
 	os.Exit(code)
-}
-
-func TestGetTodos(t *testing.T) {
-
-	req, _ := http.NewRequest("GET", "/todos", nil)
-	w := httptest.NewRecorder()
-
-	// 	router.ServeHTTP(w, req) internally creates the *gin.Context and passes it to GetTodos(c* gin.Context) handler function.
-	//  therefore no need to manually create c *gin.Context.
-	router.ServeHTTP(w, req)
-	// router.ServeHTTP(w, req) checks the registered routes.
-	// If /todos is not registered → 404.
-	// So it's a MUST to register GetTodos on /todos, the router knows which handler to call.
-
-	//checking if the code is 200 (SUCCESS)
-	if w.Code != 200 {
-		t.Fatalf("Expected 200 OK, got %d", w.Code)
-	}
-
-	t.Log("Response body:", w.Body.String())
-
 }
