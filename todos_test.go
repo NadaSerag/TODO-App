@@ -29,9 +29,21 @@ func TestGetTodos(t *testing.T) {
 
 }
 
+var testCases = []string{
+	"Sucess",
+	"Invalid JSON",
+	"Invalid Priority",
+	"Invalid Category",
+	"Past Due Date",
+}
+
 func TestCraeteTodo(t *testing.T) {
-	t.Run("Success", func(t *testing.T) { /* ... */ })
-	t.Run("EmptyDB", func(t *testing.T) { /* ... */ })
+
+	//SUCCESS
+	t.Run(testCases[0], func(t *testing.T) { /* ... */ })
+
+	//INVALID JSON
+	t.Run(testCases[1], func(t *testing.T) { /* ... */ })
 }
 
 func TestCreateTodo_Success(t *testing.T) {
