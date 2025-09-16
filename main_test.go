@@ -45,6 +45,8 @@ func TestMain(m *testing.M) {
 	// So it's a MUST to register GetTodos on /todos, the router knows which handler to call.
 	router.GET("/todos", GetTodos)
 	router.POST("/todos", CreateTodo)
+
+	//NO NEED to run the server, the tests simulates running a server on its own!
 	//router.Run()
 
 	code := m.Run() // <--- runs all tests
