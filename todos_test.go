@@ -29,6 +29,7 @@ func TestGetTodos(t *testing.T) {
 
 }
 
+// 3ady An Array of STRINGS describing different testcases for the POST method
 var testCases = []string{
 	"Sucess",
 	"Invalid JSON",
@@ -40,16 +41,12 @@ var testCases = []string{
 func TestCraeteTodo(t *testing.T) {
 
 	//SUCCESS
-	t.Run(testCases[0], func(t *testing.T) { /* ... */ })
-
+	t.Run(testCases[0], TestCreateTodo_Success)
 	//INVALID JSON
-	t.Run(testCases[1], func(t *testing.T) { /* ... */ })
+	//	t.Run(testCases[1], func(t *testing.T) { /* ... */ })
 }
 
 func TestCreateTodo_Success(t *testing.T) {
-
-	trialToAdd := Todo{Title: "POST request in Go Test!", Completed: &notCompleted}
-
 	//ALTERNATIVE: other way than JSON marshalling,
 	//manually writing JSON strings like this for example:
 	//   jsonBody := []byte(`{
@@ -58,6 +55,7 @@ func TestCreateTodo_Success(t *testing.T) {
 	//       "category": "Work",
 	//       "priority": "High"
 	//   }`)
+	trialToAdd := Todo{Title: "POST request in Go Test!", Completed: &notCompleted}
 	body, _ := json.Marshal(trialToAdd)
 
 	// 	bytes.NewBuffer() or strings.NewReader() to create an io.Reader for the request body.
