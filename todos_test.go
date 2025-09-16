@@ -36,8 +36,8 @@ func TestCraeteTodo(t *testing.T) {
 
 func TestCreateTodo_Success(t *testing.T) {
 
-	trialToAdd := Todo{Title: "New Todo", Completed: &notCompleted}
-	body, _ := json.Marshal(trialToAdd)
+	trialToAdd := Todo{Title: "POST request in Go Test!", Completed: &notCompleted}
+
 	//ALTERNATIVE: other way than JSON marshalling,
 	//manually writing JSON strings like this for example:
 	//   jsonBody := []byte(`{
@@ -46,8 +46,11 @@ func TestCreateTodo_Success(t *testing.T) {
 	//       "category": "Work",
 	//       "priority": "High"
 	//   }`)
+	body, _ := json.Marshal(trialToAdd)
 
+	// 	bytes.NewBuffer() or strings.NewReader() to create an io.Reader for the request body.
 	req, _ := http.NewRequest("POST", "/todos", bytes.NewBuffer(body))
+	// Setting the Content-Type header correctly (application/json) if you use c.ShouldBindJSON(&struct).
 	req.Header.Set("Content-Type", "application/json")
 
 	w := httptest.NewRecorder()
@@ -60,6 +63,4 @@ func TestCreateTodo_Success(t *testing.T) {
 
 	t.Log("Response body:", w.Body.String())
 
-	// 	Use bytes.NewBuffer() or strings.NewReader() to create an io.Reader for the request body.
-	// Set the Content-Type header correctly (application/json) if you use c.ShouldBindJSON(&struct).
 }
