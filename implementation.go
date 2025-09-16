@@ -23,6 +23,13 @@ import (
 // and passes it into the function as the parameter
 // the parameter is by convention named "c".
 
+// GetTodos returns list of all todos
+// @Summary      List all todos
+// @Description  Returns a list of all todos
+// @Tags         Todos
+// @Success      200  {array} Todo
+// @Produce json
+// @Router       /todos [get]
 func GetTodos(c *gin.Context) {
 	allTodos := []Todo{}
 
@@ -43,6 +50,18 @@ func GetTodos(c *gin.Context) {
 
 }
 
+type ErrorJSON struct {
+	Error string `json:"error"`
+}
+
+// GetTodoById returns a single todo by ID
+// @Summary Get a todo by ID
+// @Description Returns a single todo by its ID
+// @Tags Todos
+// @Success 200 {object} Todo
+// @Failure 404 {object} ErrorJSON "Not Found"
+// @Param        id   path      int  true  "Todo ID"
+// @Router /todos/{id} [get]
 func GetTodoById(c *gin.Context) {
 	//c.Param(...) returns the value as a string.
 	//thats wy we need to convert it to an int by strconv.Atoi
@@ -65,6 +84,14 @@ func GetTodoById(c *gin.Context) {
 	c.JSON(200, todoByIdFound)
 }
 
+// GetTodoByCategory returns a single todo by category
+// @Summary Get a todo by category
+// @Description Returns a single todo by its category
+// @Tags Todos
+// @Success 200 {array} Todo
+// @Failure 404 {object} ErrorJSON "Category Invalid"
+// @Param        category   path      string  true  "Category to search for: "
+// @Router /category/{category} [get]
 func GetTodosByCategory(c *gin.Context) {
 	//detecting the wanted category in the URL
 	category := c.Param("category")
@@ -88,6 +115,14 @@ func GetTodosByCategory(c *gin.Context) {
 	c.JSON(200, todosByCategory)
 }
 
+// GetTodoByStatus returns a single todo by status
+// @Summary Get a todo by status
+// @Description Returns a single todo by its status
+// @Tags Todos
+// @Success 200 {array} Todo
+// @Failure 404 {object} ErrorJSON "No todos with the status"
+// @Param        status   path      string  true  "Status to search for: "
+// @Router /status/{status} [get]
 func GetTodosByStatus(c *gin.Context) {
 	//detecting the wanted status from the URL
 	stat := c.Param("status")
@@ -107,6 +142,14 @@ func GetTodosByStatus(c *gin.Context) {
 
 }
 
+// GetTodoBySearch returns todos that have name-match with the search string entered
+// @Summary Get a todo by status
+// @Description Returns todos that have name-match with the search string entered
+// @Tags Todos
+// @Success 200 {array} Todo
+// @Failure 404 {object} ErrorJSON "No todos match search"
+// @Param        search   query      string  true  "search string: "
+// @Router /todos/search/ [get]
 func GetTodosBySearch(c *gin.Context) {
 	//detecting the wanted status from the URL
 	search := c.Query("q")
@@ -124,6 +167,14 @@ func GetTodosBySearch(c *gin.Context) {
 	c.JSON(200, todosBySearch)
 }
 
+// CreateTodo adds a new todo to our table
+// @Summary Adds todos
+// @Description Adding/Creating new todo to out table "todos"
+// @Tags Todos
+// @Success 200 {array} Todo
+// @Failure 404 {object} ErrorJSON "No todos match search"
+// @Param        search   query      string  true  "search string: "
+// @Router /todos/search/ [get]
 func CreateTodo(c *gin.Context) {
 	var newTodo Todo
 

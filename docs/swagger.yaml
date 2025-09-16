@@ -1,0 +1,81 @@
+definitions:
+  main.ErrorJSON:
+    properties:
+      error:
+        type: string
+    type: object
+  main.Todo:
+    properties:
+      category:
+        type: string
+      completed:
+        type: boolean
+      completedAt:
+        type: string
+      dueDate:
+        type: string
+      id:
+        type: integer
+      priority:
+        type: string
+      title:
+        type: string
+      user_id:
+        type: integer
+    required:
+    - category
+    - completed
+    - priority
+    - title
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: nadaserag2006@gmail.com
+    name: Nada Serag
+  description: |-
+    API documentation of my RESTful API - Todo App that allows clients to manage tasks (todos) through standard HTTP methods.
+    Each todo is treated as a resource, identified by a unique ID, and manipulated using predictable endpoints.
+    Authentication is handled via **JWT tokens**.
+
+    To access protected endpoints, a valid token must be included in the `Authorization` header: `Authorization: Bearer <your_token>`
+  title: TODO-App API Documentation w/ Swagger
+  version: "1.0"
+paths:
+  /todos:
+    get:
+      description: Returns a list of all todos
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/main.Todo'
+            type: array
+      summary: List all todos
+      tags:
+      - Todos
+  /todos/{id}:
+    get:
+      description: Returns a single todo by its ID
+      parameters:
+      - description: Todo ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Todo'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/main.ErrorJSON'
+      summary: Get a todo by ID
+      tags:
+      - Todos
+swagger: "2.0"

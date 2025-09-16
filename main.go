@@ -1,10 +1,24 @@
 package main
 
 import (
+	_ "github.com/NadaSerag/TODO-App/docs"
 	"github.com/NadaSerag/TODO-App/middleware"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
+
+// @title TODO-App API Documentation w/ Swagger
+// @version 1.0
+// @Description API documentation of my RESTful API - Todo App that allows clients to manage tasks (todos) through standard HTTP methods.
+// @Description Each todo is treated as a resource, identified by a unique ID, and manipulated using predictable endpoints.
+// @Description Authentication is handled via **JWT tokens**.
+// @Description
+// @Description To access protected endpoints, a valid token must be included in the `Authorization` header: `Authorization: Bearer <your_token>`
+// @contact.name Nada Serag
+// @contact.email nadaserag2006@gmail.com
+// @host localhost:8080
 
 func main() {
 	router := gin.Default()
@@ -24,7 +38,23 @@ func main() {
 	//PUT -> Update()
 	//DELETE -> Delete()
 
+	// GetTodos returns list of all todos
+	// @Summary      List all todos
+	// @Description  Returns a list of all todos
+	// @Tags         Todos
+	// @Success      200  {array} Todo
+	// @Produce json
+	// @Router       /todos [get]
 	router.GET("/todos", GetTodos)
+
+	// GetTodoById returns a single todo by ID
+	// @Summary Get a todo by ID
+	// @Description Returns a single todo by its ID
+	// @Tags Todos
+	// @Param id path int true "Todo ID"
+	// @Success 200 {object} Todo
+	// @Failure 404 {object} gin.H
+	// @Router /todos/{id} [get]
 	router.GET("/todos/:id", GetTodoById)
 	router.GET("/todos/category/:category", GetTodosByCategory)
 	router.GET("/todos/status/:status", GetTodosByStatus)
@@ -36,6 +66,9 @@ func main() {
 	router.PUT("/todos/category/:category", middleware.RequireAuthentication, UpdateTodosByCategory)
 	router.DELETE("/todos/:id", middleware.RequireAuthentication, DeleteById)
 	router.DELETE("/todos", middleware.RequireAuthentication, middleware.RequireAuthorization, DeleteAll)
+
+	// Swagger UI at /swagger/index.html
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	router.Run() // listen and serve on 0.0.0.0:8080
 
