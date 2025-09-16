@@ -18,6 +18,7 @@ func TestMain(m *testing.M) {
 	ConnectToDB()
 
 	//setting up the TEST database (for testing purposes only)
+
 	query := `
     CREATE TABLE IF NOT EXISTS test_todos (
         id SERIAL PRIMARY KEY,
@@ -26,7 +27,8 @@ func TestMain(m *testing.M) {
         category TEXT,
         priority TEXT,
         completedAt TIMESTAMP NULL,
-        dueDate TIMESTAMP NULL
+        dueDate TIMESTAMP NULL,
+				userID INTEGER 
     );`
 
 	DB.Exec(query)
@@ -42,8 +44,7 @@ func TestMain(m *testing.M) {
 	// If /todos is not registered → 404.
 	// So it's a MUST to register GetTodos on /todos, the router knows which handler to call.
 	router.GET("/todos", GetTodos)
-
-	//router.GET("/todos/:id", TestGetTodoById)
+	router.POST("/todos", CreateTodo)
 	//router.Run()
 
 	code := m.Run() // <--- runs all tests
