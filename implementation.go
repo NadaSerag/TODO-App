@@ -169,7 +169,7 @@ func GetTodosBySearch(c *gin.Context) {
 }
 
 // CreateTodo adds a new todo to our table
-// @Summary Adds todos
+// @Summary Add todo
 // @Description Adding/Creating new todo to out table "todos"
 // @Tags Todos
 // @Accept       json
@@ -243,6 +243,18 @@ func CreateTodo(c *gin.Context) {
 	c.JSON(200, newTodo)
 }
 
+// @Summary Edit a todo
+// @Description Editing a todo by entering its id, and the request includes the updated data
+// @Tags Todos
+// @Accept       json
+// @Produce      json
+// Security     BearerAuth
+// @Param        todo  body      Todo  true  "Updates"
+// @Success      201   {object}  Todo
+// @Failure      400   {object}  ErrorJSON "Invalid json, or missing fields, or invalid priority/category or past due date"
+// @Failure      401   {object}  ErrorJSON "Invalid Token"
+// @Failure      403   {object}  ErrorJSON "Unauthorized (Forbidden for that person to do that action)"
+// @Router       /todos/{id} [put]
 func UpdateTodo(c *gin.Context) {
 
 	var updatedTodo Todo
@@ -311,6 +323,17 @@ func UpdateTodo(c *gin.Context) {
 	c.JSON(200, updatedTodo)
 }
 
+// @Summary Edit todos
+// @Description Editing multiple todos of the same category to update their state of completion
+// @Tags Todos
+// @Accept       json
+// @Produce      json
+// Security     BearerAuth
+// @Param        completion_status  body      TodoDTO  true  "Updates"
+// @Success      201   {object}  Todo
+// @Failure      400   {object}  ErrorJSON "Invalid json"
+// Failure      401   {object}  ErrorJSON "Unauthorized"
+// @Router       /todos/category/{category}} [put]
 func UpdateTodosByCategory(c *gin.Context) {
 	var updatedTodos []Todo
 	var updatedStat TodoDTO
@@ -347,6 +370,15 @@ func UpdateTodosByCategory(c *gin.Context) {
 	c.JSON(200, updatedTodos)
 }
 
+// @Summary Delete a todo
+// @Description Deleting a todo by its id
+// @Tags Todos
+// Security     BearerAuth
+// @Param        id   path      int  true  "Todo ID to delete"
+// @Success      201   {object}  SuccessJSON "Todo deleted successfully"
+// @Failure      400   {object}  ErrorJSON "No todo exists with the ID entered"
+// Failure      401   {object}  ErrorJSON "Unauthorized"
+// @Router       /todos/{id} [delete]
 func DeleteById(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 
@@ -365,6 +397,14 @@ func DeleteById(c *gin.Context) {
 	c.JSON(200, gin.H{"message": "Todo deleted"})
 }
 
+// @Summary Delete ALL todos
+// @Description Deleting ALL todos in the entire database - this action is only permissible for an Admin.
+// @Tags Todos
+// @Security     BearerAuth
+// @Success      201   {object}  SuccessJSON "All todos deleted"
+// @Failure      400   {object}  ErrorJSON "Invalid Token"
+// @Failure      401   {object}  ErrorJSON "Unauthorized"
+// @Router       /todos [delete]
 func DeleteAll(c *gin.Context) {
 
 	//deleting a;; rows, soft deletion
