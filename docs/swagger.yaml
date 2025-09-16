@@ -42,6 +42,52 @@ info:
   title: TODO-App API Documentation w/ Swagger
   version: "1.0"
 paths:
+  /category/{category}:
+    get:
+      description: Returns a single todo by its category
+      parameters:
+      - description: 'Category to search for: '
+        in: path
+        name: category
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/main.Todo'
+            type: array
+        "404":
+          description: Category Invalid
+          schema:
+            $ref: '#/definitions/main.ErrorJSON'
+      summary: Get a todo by category
+      tags:
+      - Todos
+  /status/{status}:
+    get:
+      description: Returns a single todo by its status
+      parameters:
+      - description: 'Status to search for: '
+        in: path
+        name: status
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/main.Todo'
+            type: array
+        "404":
+          description: No todos with the status
+          schema:
+            $ref: '#/definitions/main.ErrorJSON'
+      summary: Get a todo by status
+      tags:
+      - Todos
   /todos:
     get:
       description: Returns a list of all todos
@@ -55,6 +101,38 @@ paths:
               $ref: '#/definitions/main.Todo'
             type: array
       summary: List all todos
+      tags:
+      - Todos
+    post:
+      consumes:
+      - application/json
+      description: Adding/Creating new todo to out table "todos"
+      parameters:
+      - description: Todo to create
+        in: body
+        name: todo
+        required: true
+        schema:
+          $ref: '#/definitions/main.Todo'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/main.Todo'
+        "400":
+          description: Invalid json, or missing fields, or invalid priority/category
+            or past due date
+          schema:
+            $ref: '#/definitions/main.ErrorJSON'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/main.ErrorJSON'
+      security:
+      - BearerAuth: []
+      summary: Adds todos
       tags:
       - Todos
   /todos/{id}:
@@ -78,4 +156,32 @@ paths:
       summary: Get a todo by ID
       tags:
       - Todos
+  /todos/search/:
+    get:
+      description: Returns todos that have name-match with the search string entered
+      parameters:
+      - description: 'search string: '
+        in: query
+        name: q
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/main.Todo'
+            type: array
+        "404":
+          description: No todos match search
+          schema:
+            $ref: '#/definitions/main.ErrorJSON'
+      summary: Search Todos by title
+      tags:
+      - Todos
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

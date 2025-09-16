@@ -19,7 +19,9 @@ import (
 // @contact.name Nada Serag
 // @contact.email nadaserag2006@gmail.com
 // @host localhost:8080
-
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	router := gin.Default()
 

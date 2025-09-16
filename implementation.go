@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/NadaSerag/TODO-App/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -143,12 +144,12 @@ func GetTodosByStatus(c *gin.Context) {
 }
 
 // GetTodoBySearch returns todos that have name-match with the search string entered
-// @Summary Get a todo by status
+// @Summary Search Todos by title
 // @Description Returns todos that have name-match with the search string entered
 // @Tags Todos
 // @Success 200 {array} Todo
 // @Failure 404 {object} ErrorJSON "No todos match search"
-// @Param        search   query      string  true  "search string: "
+// @Param        q   query      string  true  "search string: "
 // @Router /todos/search/ [get]
 func GetTodosBySearch(c *gin.Context) {
 	//detecting the wanted status from the URL
@@ -157,7 +158,7 @@ func GetTodosBySearch(c *gin.Context) {
 	//the returning response initialized as an empty array of todos
 	todosBySearch := []Todo{}
 
-	result := DB.Where("title LIKE ?", search).Find(&todosBySearch)
+	result := DB.Where("title LIKE ?", "%"+search+"%").Find(&todosBySearch)
 
 	if result.RowsAffected == 0 {
 		// code 404 used bec: Todo not found for GET, PUT, or DELETE.
@@ -171,10 +172,14 @@ func GetTodosBySearch(c *gin.Context) {
 // @Summary Adds todos
 // @Description Adding/Creating new todo to out table "todos"
 // @Tags Todos
-// @Success 200 {array} Todo
-// @Failure 404 {object} ErrorJSON "No todos match search"
-// @Param        search   query      string  true  "search string: "
-// @Router /todos/search/ [get]
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        todo  body      Todo  true  "Todo to create"
+// @Success      201   {object}  Todo
+// @Failure      400   {object}  ErrorJSON "Invalid json, or missing fields, or invalid priority/category or past due date"
+// @Failure      401   {object}  ErrorJSON "Unauthorized"
+// @Router       /todos [post]
 func CreateTodo(c *gin.Context) {
 	var newTodo Todo
 
@@ -187,14 +192,14 @@ func CreateTodo(c *gin.Context) {
 	//returns an error, error is = nil if JSON parses successfully
 	err := c.ShouldBindJSON(&newTodo)
 
-	//gottenClaims, exists_ok := middleware.GetUserClaims(c)
+	gottenClaims, exists_ok := middleware.GetUserClaims(c)
 
-	//everythingOk := middleware.ClaimsCheck(c, gottenClaims, exists_ok)
+	everythingOk := middleware.ClaimsCheck(c, gottenClaims, exists_ok)
 
 	//if false if returned by ClaimsCheck, then it c.aborted in the function ClaimsCheck already, so we just exit (return)
-	// if !everythingOk {
-	// 	return
-	// }
+	if !everythingOk {
+		return
+	}
 
 	//checking if the title is empty
 	if newTodo.Title == "" {
@@ -232,7 +237,7 @@ func CreateTodo(c *gin.Context) {
 	}
 
 	//SETTING USER_ID
-	//newTodo.UserID = gottenClaims.UserID
+	newTodo.UserID = gottenClaims.UserID
 
 	DB.Create(&newTodo)
 	c.JSON(200, newTodo)

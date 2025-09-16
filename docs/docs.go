@@ -18,6 +18,76 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/category/{category}": {
+            "get": {
+                "description": "Returns a single todo by its category",
+                "tags": [
+                    "Todos"
+                ],
+                "summary": "Get a todo by category",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Category to search for: ",
+                        "name": "category",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/main.Todo"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Category Invalid",
+                        "schema": {
+                            "$ref": "#/definitions/main.ErrorJSON"
+                        }
+                    }
+                }
+            }
+        },
+        "/status/{status}": {
+            "get": {
+                "description": "Returns a single todo by its status",
+                "tags": [
+                    "Todos"
+                ],
+                "summary": "Get a todo by status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Status to search for: ",
+                        "name": "status",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/main.Todo"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No todos with the status",
+                        "schema": {
+                            "$ref": "#/definitions/main.ErrorJSON"
+                        }
+                    }
+                }
+            }
+        },
         "/todos": {
             "get": {
                 "description": "Returns a list of all todos",
@@ -36,6 +106,90 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/main.Todo"
                             }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Adding/Creating new todo to out table \"todos\"",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Todos"
+                ],
+                "summary": "Adds todos",
+                "parameters": [
+                    {
+                        "description": "Todo to create",
+                        "name": "todo",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.Todo"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/main.Todo"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid json, or missing fields, or invalid priority/category or past due date",
+                        "schema": {
+                            "$ref": "#/definitions/main.ErrorJSON"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/main.ErrorJSON"
+                        }
+                    }
+                }
+            }
+        },
+        "/todos/search/": {
+            "get": {
+                "description": "Returns todos that have name-match with the search string entered",
+                "tags": [
+                    "Todos"
+                ],
+                "summary": "Search Todos by title",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "search string: ",
+                        "name": "q",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/main.Todo"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No todos match search",
+                        "schema": {
+                            "$ref": "#/definitions/main.ErrorJSON"
                         }
                     }
                 }
@@ -117,6 +271,13 @@ const docTemplate = `{
                     "type": "integer"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`
