@@ -4,6 +4,11 @@ definitions:
       error:
         type: string
     type: object
+  main.SuccessJSON:
+    properties:
+      message:
+        type: string
+    type: object
   main.Todo:
     properties:
       category:
@@ -27,6 +32,13 @@ definitions:
     - completed
     - priority
     - title
+    type: object
+  main.TodoDTO:
+    properties:
+      completed:
+        type: boolean
+    required:
+    - completed
     type: object
 host: localhost:8080
 info:
@@ -89,6 +101,27 @@ paths:
       tags:
       - Todos
   /todos:
+    delete:
+      description: Deleting ALL todos in the entire database - this action is only
+        permissible for an Admin.
+      responses:
+        "201":
+          description: All todos deleted
+          schema:
+            $ref: '#/definitions/main.SuccessJSON'
+        "400":
+          description: Invalid Token
+          schema:
+            $ref: '#/definitions/main.ErrorJSON'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/main.ErrorJSON'
+      security:
+      - BearerAuth: []
+      summary: Delete ALL todos
+      tags:
+      - Todos
     get:
       description: Returns a list of all todos
       produces:
@@ -132,10 +165,30 @@ paths:
             $ref: '#/definitions/main.ErrorJSON'
       security:
       - BearerAuth: []
-      summary: Adds todos
+      summary: Add todo
       tags:
       - Todos
   /todos/{id}:
+    delete:
+      description: Deleting a todo by its id
+      parameters:
+      - description: Todo ID to delete
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "201":
+          description: Todo deleted successfully
+          schema:
+            $ref: '#/definitions/main.SuccessJSON'
+        "400":
+          description: No todo exists with the ID entered
+          schema:
+            $ref: '#/definitions/main.ErrorJSON'
+      summary: Delete a todo
+      tags:
+      - Todos
     get:
       description: Returns a single todo by its ID
       parameters:
@@ -154,6 +207,68 @@ paths:
           schema:
             $ref: '#/definitions/main.ErrorJSON'
       summary: Get a todo by ID
+      tags:
+      - Todos
+    put:
+      consumes:
+      - application/json
+      description: Editing a todo by entering its id, and the request includes the
+        updated data
+      parameters:
+      - description: Updates
+        in: body
+        name: todo
+        required: true
+        schema:
+          $ref: '#/definitions/main.Todo'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/main.Todo'
+        "400":
+          description: Invalid json, or missing fields, or invalid priority/category
+            or past due date
+          schema:
+            $ref: '#/definitions/main.ErrorJSON'
+        "401":
+          description: Invalid Token
+          schema:
+            $ref: '#/definitions/main.ErrorJSON'
+        "403":
+          description: Unauthorized (Forbidden for that person to do that action)
+          schema:
+            $ref: '#/definitions/main.ErrorJSON'
+      summary: Edit a todo
+      tags:
+      - Todos
+  /todos/category/{category}}:
+    put:
+      consumes:
+      - application/json
+      description: Editing multiple todos of the same category to update their state
+        of completion
+      parameters:
+      - description: Updates
+        in: body
+        name: completion_status
+        required: true
+        schema:
+          $ref: '#/definitions/main.TodoDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/main.Todo'
+        "400":
+          description: Invalid json
+          schema:
+            $ref: '#/definitions/main.ErrorJSON'
+      summary: Edit todos
       tags:
       - Todos
   /todos/search/:

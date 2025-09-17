@@ -126,7 +126,7 @@ const docTemplate = `{
                 "tags": [
                     "Todos"
                 ],
-                "summary": "Adds todos",
+                "summary": "Add todo",
                 "parameters": [
                     {
                         "description": "Todo to create",
@@ -153,6 +153,78 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/main.ErrorJSON"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Deleting ALL todos in the entire database - this action is only permissible for an Admin.",
+                "tags": [
+                    "Todos"
+                ],
+                "summary": "Delete ALL todos",
+                "responses": {
+                    "201": {
+                        "description": "All todos deleted",
+                        "schema": {
+                            "$ref": "#/definitions/main.SuccessJSON"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Token",
+                        "schema": {
+                            "$ref": "#/definitions/main.ErrorJSON"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/main.ErrorJSON"
+                        }
+                    }
+                }
+            }
+        },
+        "/todos/category/{category}}": {
+            "put": {
+                "description": "Editing multiple todos of the same category to update their state of completion",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Todos"
+                ],
+                "summary": "Edit todos",
+                "parameters": [
+                    {
+                        "description": "Updates",
+                        "name": "completion_status",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.TodoDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/main.Todo"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid json",
                         "schema": {
                             "$ref": "#/definitions/main.ErrorJSON"
                         }
@@ -225,6 +297,86 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "put": {
+                "description": "Editing a todo by entering its id, and the request includes the updated data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Todos"
+                ],
+                "summary": "Edit a todo",
+                "parameters": [
+                    {
+                        "description": "Updates",
+                        "name": "todo",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.Todo"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/main.Todo"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid json, or missing fields, or invalid priority/category or past due date",
+                        "schema": {
+                            "$ref": "#/definitions/main.ErrorJSON"
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid Token",
+                        "schema": {
+                            "$ref": "#/definitions/main.ErrorJSON"
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized (Forbidden for that person to do that action)",
+                        "schema": {
+                            "$ref": "#/definitions/main.ErrorJSON"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deleting a todo by its id",
+                "tags": [
+                    "Todos"
+                ],
+                "summary": "Delete a todo",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Todo ID to delete",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Todo deleted successfully",
+                        "schema": {
+                            "$ref": "#/definitions/main.SuccessJSON"
+                        }
+                    },
+                    "400": {
+                        "description": "No todo exists with the ID entered",
+                        "schema": {
+                            "$ref": "#/definitions/main.ErrorJSON"
+                        }
+                    }
+                }
             }
         }
     },
@@ -233,6 +385,14 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "main.SuccessJSON": {
+            "type": "object",
+            "properties": {
+                "message": {
                     "type": "string"
                 }
             }
@@ -269,6 +429,17 @@ const docTemplate = `{
                 },
                 "user_id": {
                     "type": "integer"
+                }
+            }
+        },
+        "main.TodoDTO": {
+            "type": "object",
+            "required": [
+                "completed"
+            ],
+            "properties": {
+                "completed": {
+                    "type": "boolean"
                 }
             }
         }

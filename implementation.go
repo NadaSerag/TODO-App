@@ -52,7 +52,11 @@ func GetTodos(c *gin.Context) {
 }
 
 type ErrorJSON struct {
-	Error string `json:"error"`
+	ErrorStr string `json:"error"`
+}
+
+type SuccessJSON struct {
+	SuccessStr string `json:"message"`
 }
 
 // GetTodoById returns a single todo by ID
