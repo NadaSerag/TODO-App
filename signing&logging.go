@@ -11,13 +11,14 @@ import (
 )
 
 // @Summary New Account
-// @Description Adding/Creating new todo to out table "todos"
+// @Description Signing Up by entering a JSON body that contains username, password, and role - user or admin (role is by default set to "user")
 // @Tags Users
 // @Accept       json
 // @Produce      json
 // @Param        User  body      User  true  "Sign-Up user"
 // @Success      201   {object}  UserDTO
 // @Failure      400   {object}  ErrorJSON "Invalid JSON"
+// @Failure      400   {object}  ErrorJSON "Failed to hash password"
 // @Router       /signup [post]
 func SignUp(c *gin.Context) {
 	var newUser User
@@ -53,6 +54,18 @@ func SignUp(c *gin.Context) {
 	c.JSON(200, ToUserDTO(newUser))
 }
 
+// @Summary Log In
+// @Description Logging in by entering a JSON body that contains a username & password.
+// @Tags Users
+// @Accept       json
+// @Produce      json
+// @Param        User  body      User  true  "Log-in user"
+// @Success      201   {object}  TokenJSON
+// @Failure      400   {object}  ErrorJSON "Invalid JSON"
+// @Failure      400   {object}  ErrorJSON "Failure of token creation"
+// @Failure      404   {object}  ErrorJSON "Non-existent username"
+// @Failure      401   {object}  ErrorJSON "Wrong password"
+// @Router       /login [post]
 func LogIn(c *gin.Context) {
 	var loggingUser User
 

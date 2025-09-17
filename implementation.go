@@ -58,6 +58,10 @@ type SuccessJSON struct {
 	SuccessStr string `json:"message"`
 }
 
+type TokenJSON struct {
+	TokenStr string `json:"token"`
+}
+
 // GetTodoById returns a single todo by ID
 // @Summary Get a todo by ID
 // @Description Returns a single todo by its ID
