@@ -48,7 +48,6 @@ func GetTodos(c *gin.Context) {
 
 	//200 code for Successful GET
 	c.JSON(200, allTodos)
-
 }
 
 type ErrorJSON struct {

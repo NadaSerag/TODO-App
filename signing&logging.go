@@ -10,6 +10,15 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// @Summary New Account
+// @Description Adding/Creating new todo to out table "todos"
+// @Tags Users
+// @Accept       json
+// @Produce      json
+// @Param        User  body      User  true  "Sign-Up user"
+// @Success      201   {object}  UserDTO
+// @Failure      400   {object}  ErrorJSON "Invalid JSON"
+// @Router       /signup [post]
 func SignUp(c *gin.Context) {
 	var newUser User
 
