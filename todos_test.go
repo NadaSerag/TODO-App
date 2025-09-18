@@ -31,23 +31,23 @@ func TestGetTodos(t *testing.T) {
 }
 
 // 3ady An Array of STRINGS describing different testcases for the POST method
-var testCases = []string{
-	"Sucess",
+var testCasesCREATE = []string{
+	"Success",
 	"Invalid JSON - Missing Fields",
 	"Invalid Priority",
 	"Past Due Date",
 }
 
-func TestCraeteTodo(t *testing.T) {
+func TestCreateTodo(t *testing.T) {
 
 	//SUCCESS
-	t.Run(testCases[0], TestCreateTodo_Success)
+	t.Run(testCasesCREATE[0], TestCreateTodo_Success)
 	//INVALID JSON - MISSING FIELDS
-	t.Run(testCases[1], TestCreateTodo_MissingFields)
+	t.Run(testCasesCREATE[1], TestCreateTodo_MissingFields)
 	//INVALID PRIORITY
-	t.Run(testCases[2], TestCreateTodo_InvalidPriority)
+	t.Run(testCasesCREATE[2], TestCreateTodo_InvalidPriority)
 	//PAST DUE DATE
-	t.Run(testCases[3], TestCreateTodo_PassedDue)
+	t.Run(testCasesCREATE[3], TestCreateTodo_PassedDue)
 }
 
 func TestCreateTodo_Success(t *testing.T) {
@@ -59,6 +59,7 @@ func TestCreateTodo_Success(t *testing.T) {
 	//       "category": "Work",
 	//       "priority": "High"
 	//   }`)
+
 	trialToAdd := Todo{Title: "POST request in Go Test!", Completed: &notCompleted, Priority: "High", Category: "Work"}
 	body, _ := json.Marshal(trialToAdd)
 
@@ -66,6 +67,7 @@ func TestCreateTodo_Success(t *testing.T) {
 	req, _ := http.NewRequest("POST", "/todos", bytes.NewBuffer(body))
 	// Setting the Content-Type header correctly (application/json) if you use c.ShouldBindJSON(&struct).
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo3LCJ1c2VybmFtZSI6Im5hZGFhc2VyYWciLCJyb2xlIjoidXNlciIsImV4cCI6MTc1ODMxMDk0NiwiaWF0IjoxNzU4MjI0NTQ2fQ.Qehbs_yVja_WjHv0yCe9CRvfa7gnpF49HFN3OuQDOzw")
 
 	w := httptest.NewRecorder()
 

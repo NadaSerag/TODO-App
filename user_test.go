@@ -8,13 +8,19 @@ import (
 	"testing"
 )
 
+var testCasesSIGNUP = []string{
+	"Successful: ",
+	"Invalid JSON: ",
+	"Duplicate username: ",
+}
+
 func TestSignUp(t *testing.T) {
 	//SUCCESSFUL SIGNING UP
-	t.Run("Successful", TestSignUp_Success)
+	t.Run(testCasesSIGNUP[0], TestSignUp_Success)
 	//INVALID JSON
-	t.Run("Failure", TestSignUp_Fails)
+	t.Run(testCasesSIGNUP[1], TestSignUp_Fails)
 	//DUPLICATE USERNAME
-	t.Run("Failure", TestSignUp_Duplicate)
+	t.Run(testCasesSIGNUP[2], TestSignUp_Duplicate)
 }
 
 func TestSignUp_Success(t *testing.T) {
@@ -63,13 +69,19 @@ func TestSignUp_Duplicate(t *testing.T) {
 	t.Log("Response:", w.Body.String())
 }
 
+var testCasesLOGIN = []string{
+	"Successful: ",
+	"User doesn't have an account: ",
+	"Wrong Password: ",
+}
+
 func TestLogIn(t *testing.T) {
 	//SUCCESSFUL LOGING UP
-	t.Run("Successful ", TestLogIn_Success)
+	t.Run(testCasesLOGIN[0], TestLogIn_Success)
 	//USER DIDNT CREATE AN ACCOUNT
-	t.Run("User doesn't have an account: ", TestLogIn_nonExistent)
+	t.Run(testCasesLOGIN[1], TestLogIn_nonExistent)
 	//WRONG PASSWORD
-	t.Run("Wrong Password ", TestLogIn_WrongPass)
+	t.Run(testCasesLOGIN[2], TestLogIn_WrongPass)
 
 }
 func TestLogIn_Success(t *testing.T) {
