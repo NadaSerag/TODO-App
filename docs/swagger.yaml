@@ -40,6 +40,35 @@ definitions:
     required:
     - completed
     type: object
+  main.TokenJSON:
+    properties:
+      token:
+        type: string
+    type: object
+  main.User:
+    properties:
+      id:
+        type: integer
+      password:
+        description: bcypt hash + required
+        type: string
+      role:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  main.UserDTO:
+    properties:
+      id:
+        type: integer
+      role:
+        type: string
+      username:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -77,6 +106,67 @@ paths:
       summary: Get a todo by category
       tags:
       - Todos
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Logging in by entering a JSON body that contains a username & password.
+      parameters:
+      - description: Log-in user
+        in: body
+        name: User
+        required: true
+        schema:
+          $ref: '#/definitions/main.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/main.TokenJSON'
+        "400":
+          description: Failure of token creation
+          schema:
+            $ref: '#/definitions/main.ErrorJSON'
+        "401":
+          description: Wrong password
+          schema:
+            $ref: '#/definitions/main.ErrorJSON'
+        "404":
+          description: Non-existent username
+          schema:
+            $ref: '#/definitions/main.ErrorJSON'
+      summary: Log In
+      tags:
+      - Users
+  /signup:
+    post:
+      consumes:
+      - application/json
+      description: Signing Up by entering a JSON body that contains username, password,
+        and role - user or admin (role is by default set to "user")
+      parameters:
+      - description: Sign-Up user
+        in: body
+        name: User
+        required: true
+        schema:
+          $ref: '#/definitions/main.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/main.UserDTO'
+        "400":
+          description: Failed to hash password
+          schema:
+            $ref: '#/definitions/main.ErrorJSON'
+      summary: New Account
+      tags:
+      - Users
   /status/{status}:
     get:
       description: Returns a single todo by its status

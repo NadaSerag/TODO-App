@@ -40,23 +40,7 @@ func main() {
 	//PUT -> Update()
 	//DELETE -> Delete()
 
-	// GetTodos returns list of all todos
-	// @Summary      List all todos
-	// @Description  Returns a list of all todos
-	// @Tags         Todos
-	// @Success      200  {array} Todo
-	// @Produce json
-	// @Router       /todos [get]
 	router.GET("/todos", GetTodos)
-
-	// GetTodoById returns a single todo by ID
-	// @Summary Get a todo by ID
-	// @Description Returns a single todo by its ID
-	// @Tags Todos
-	// @Param id path int true "Todo ID"
-	// @Success 200 {object} Todo
-	// @Failure 404 {object} gin.H
-	// @Router /todos/{id} [get]
 	router.GET("/todos/:id", GetTodoById)
 	router.GET("/todos/category/:category", GetTodosByCategory)
 	router.GET("/todos/status/:status", GetTodosByStatus)

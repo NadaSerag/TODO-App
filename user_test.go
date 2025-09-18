@@ -13,6 +13,8 @@ func TestSignUp(t *testing.T) {
 	t.Run("Successful", TestSignUp_Success)
 	//INVALID JSON
 	t.Run("Failure", TestSignUp_Fails)
+	//DUPLICATE USERNAME
+	t.Run("Failure", TestSignUp_Duplicate)
 }
 
 func TestSignUp_Success(t *testing.T) {
@@ -48,11 +50,26 @@ func TestSignUp_Fails(t *testing.T) {
 	t.Log("Response:", w.Body.String())
 }
 
+func TestSignUp_Duplicate(t *testing.T) {
+	//INVALID JSON, missing closing quotes for username
+	invalidJSON := `{"username": "nadaserag , "password": "aprettypassword3030"}`
+	req, _ := http.NewRequest("POST", "/signup", bytes.NewBufferString(invalidJSON))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	if w.Code != 200 {
+		t.Fatalf("Expected 200 OK, got %d", w.Code)
+	}
+	t.Log("Response:", w.Body.String())
+}
+
 func TestLogIn(t *testing.T) {
 	//SUCCESSFUL LOGING UP
-	t.Run("Successful", TestLogIn_Success)
+	t.Run("Successful ", TestLogIn_Success)
 	//USER DIDNT CREATE AN ACCOUNT
-	t.Run("Failure", TestLogIn_nonExistent)
+	t.Run("User doesn't have an account: ", TestLogIn_nonExistent)
+	//WRONG PASSWORD
+	t.Run("Wrong Password ", TestLogIn_WrongPass)
 
 }
 func TestLogIn_Success(t *testing.T) {
@@ -77,6 +94,26 @@ func TestLogIn_Success(t *testing.T) {
 
 func TestLogIn_nonExistent(t *testing.T) {
 	userToSign := User{Username: "userNotSignedUP", Password: "lol"}
+	body, _ := json.Marshal(userToSign)
+
+	// 	bytes.NewBuffer() or strings.NewReader() to create an io.Reader for the request body.
+	req, _ := http.NewRequest("POST", "/login", bytes.NewBuffer(body))
+	// Setting the Content-Type header correctly (application/json) if you use c.ShouldBindJSON(&struct).
+	req.Header.Set("Content-Type", "application/json")
+
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	if w.Code != 200 {
+		t.Fatalf("Expected 200 OK, got %d", w.Code)
+	}
+
+	t.Log("Token generated:", w.Body.String())
+}
+
+func TestLogIn_WrongPass(t *testing.T) {
+	userToSign := User{Username: "nadaserag", Password: "wrongpass"}
 	body, _ := json.Marshal(userToSign)
 
 	// 	bytes.NewBuffer() or strings.NewReader() to create an io.Reader for the request body.
